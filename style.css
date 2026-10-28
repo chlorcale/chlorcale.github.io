@@ -232,3 +232,7 @@ img.world-pixel{width:min(88vw,130vh);height:auto;max-height:none;object-fit:con
 /* DIO keeps a locked size and position while descending; no bounce or sway. */
 .dio-entrance{left:50%;top:50%;animation:dio-drop-point 1.65s steps(12,end) .08s both}
 @keyframes dio-drop-point{0%{opacity:0;transform:translate(-50%,-170vh)}18%{opacity:1;transform:translate(-50%,-140vh)}100%{opacity:1;transform:translate(-50%,-50%)}}
+/* Keep DIO and his pose fully still until a button press; replay only on activation. */
+.dio-entrance{top:50%;left:50%;opacity:0;transform:translate(-50%,-170vh);animation:none}
+.bullsheet-overlay.active .dio-entrance{animation:dio-drop-point 1.65s steps(12,end) .08s both}
+@keyframes dio-drop-point{0%{opacity:0;transform:translate(-50%,-170vh)}18%{opacity:1;transform:translate(-50%,-140vh)}100%{opacity:1;transform:translate(-50%,-50%)}}

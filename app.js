@@ -5,7 +5,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
 const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
-const ASSET_VERSION = '20261028-21';
+const ASSET_VERSION = '20261028-22';
 let markedPromise;
 let currentTrack = 0;
 const PLAYLIST = [
@@ -49,7 +49,7 @@ function initBullSheet() {
   const audio = document.getElementById('site-track');
   const stopSfx = document.getElementById('dio-sfx');
   const dioSprite = overlay.querySelector('.dio-pixel'), worldSprite = overlay.querySelector('.world-pixel');
-  const dioSrc = dioSprite.src;
+  const dioSrc = dioSprite.dataset.src;
   let musicWasPlaying = false, effectTimer, impactTimer, spriteTimers = [];
   const worldFrames = [0,1,2,3].map(i => `assets/dio_and_theworld/the-world-pose-${i}.png`);
   const dioHold = 'assets/dio_and_theworld/dio-point-hold.png';
@@ -61,8 +61,7 @@ function initBullSheet() {
     if (!e.target.closest?.('#bullsheet-button')) return;
     if (overlay.classList.contains('active')) return;
     clearTimeout(effectTimer); clearTimeout(impactTimer); spriteTimers.forEach(clearTimeout); spriteTimers = [];
-    dioSprite.removeAttribute('src'); worldSprite.src = worldFrames[0];
-    requestAnimationFrame(() => { dioSprite.src = dioSrc; });
+    dioSprite.src = dioSrc; worldSprite.src = worldFrames[0];
     musicWasPlaying = !audio.paused;
     if (!audio.paused) audio.pause();
     playStopSfx();
@@ -88,6 +87,7 @@ function initBullSheet() {
     overlay.classList.remove('world-arrived');
     overlay.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('bullsheet-active');
+    dioSprite.removeAttribute('src'); worldSprite.removeAttribute('src');
     stopSfx.pause(); stopSfx.currentTime = 0;
     if (musicWasPlaying) audio.play().catch(() => {});
     musicWasPlaying = false;
