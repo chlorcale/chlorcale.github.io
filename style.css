@@ -131,3 +131,51 @@ body.article-open .toc,body.article-open .post-head,body.article-open .post-nav{
 body.article-open .melanie-corner{display:none}
 @media(max-width:700px){.melanie-corner{top:7px;right:12px;width:50px}.top{padding-right:78px}}
 @media(max-width:420px){.melanie-corner{width:42px;right:10px}.top{padding-right:66px}}
+
+/* Melanie belongs in the open upper-right pocket of the home hero. */
+.top{padding-right:32px}
+.melanie-corner{position:absolute;z-index:3;top:5px;right:4%;width:clamp(112px,10vw,154px);display:grid;justify-items:center;pointer-events:none;filter:drop-shadow(4px 5px 0 color-mix(in srgb,var(--cat-crypto) 44%,transparent))}
+.melanie-corner span{font:13px var(--pixel);color:var(--accent);background:var(--paper);border:1px solid var(--accent);padding:4px 9px;box-shadow:3px 3px 0 color-mix(in srgb,var(--accent) 26%,transparent)}
+.melanie-corner img{display:block;width:100%;height:auto;image-rendering:pixelated}
+body.article-open .melanie-corner{display:none}
+@media(max-width:700px){.melanie-corner{top:2px;right:2%;width:clamp(74px,19vw,112px)}}
+/* Subtle, visible pixel rain behind the interface. */
+.ambient-rain{position:fixed;z-index:1;inset:0;pointer-events:none;opacity:.21;background-image:repeating-linear-gradient(174deg,transparent 0 54px,color-mix(in srgb,var(--cat-web) 72%,transparent) 55px 57px,transparent 58px 112px),repeating-linear-gradient(174deg,transparent 0 126px,color-mix(in srgb,var(--accent) 62%,transparent) 127px 130px,transparent 131px 210px);background-size:67px 230px,131px 310px;animation:ambient-rainfall 1.8s linear infinite;mask-image:linear-gradient(90deg,transparent 0 8%,#000 16% 86%,transparent 96%)}
+@keyframes ambient-rainfall{to{background-position:0 230px,0 310px}}
+/* Random BullSheet plays as a brief, full-screen pixel cutscene. */
+.bullsheet-overlay{background:#080a0f;isolation:isolate}
+.bullsheet-overlay.active{animation:screen-flicker .13s steps(2,end) 8}
+.bullsheet-overlay:before{z-index:8;opacity:.3;background:repeating-linear-gradient(0deg,transparent 0 3px,#bed7e914 4px 5px);mix-blend-mode:screen;animation:scan-jump .19s steps(2,end) infinite}
+.bullsheet-flash{position:absolute;z-index:7;inset:0;background:#fff;opacity:0;pointer-events:none}
+.bullsheet-overlay.active .bullsheet-flash{animation:stop-flash .48s steps(1,end) .9s}
+.bullsheet-stage{position:absolute;inset:0;z-index:3;overflow:hidden;perspective:900px}
+.dio-entrance,.world-entrance{position:absolute;display:grid;justify-items:center;gap:10px;opacity:0;color:#f6d85f;font:14px var(--pixel);text-shadow:3px 3px #603c78}
+.dio-entrance{left:50%;top:50%;transform:translate(-50%,-50%) scale(.35);animation:dio-point 1.45s steps(6,end) .18s both}
+.dio-pixel{width:clamp(110px,16vw,190px);height:clamp(150px,22vw,250px);display:grid;place-items:center;background:linear-gradient(135deg,transparent 0 19%,#281d3d 20% 27%,transparent 28%),linear-gradient(45deg,transparent 0 15%,#d1a833 16% 55%,#f5d56a 56% 70%,transparent 71%);clip-path:polygon(38% 0,67% 0,68% 14%,85% 12%,88% 26%,100% 29%,94% 40%,78% 38%,73% 53%,94% 60%,100% 67%,72% 65%,68% 100%,27% 100%,34% 62%,18% 48%,10% 32%,24% 28%,31% 12%);filter:drop-shadow(9px 8px 0 #422e68)}
+.dio-pixel svg{width:100%;height:100%;image-rendering:pixelated;filter:drop-shadow(0 0 8px #ffdf6d)}
+.dio-entrance span{font-size:clamp(18px,3vw,34px);letter-spacing:.08em;color:#fff;text-shadow:3px 3px #b7344b}
+.world-entrance{right:12%;top:48%;transform:translate(120vw,-50%) rotateY(-25deg);color:#e5d4ff;animation:world-fly .72s steps(5,end) 1.55s forwards}
+.world-pixel{position:relative;width:clamp(145px,20vw,250px);height:clamp(170px,24vw,290px);background:linear-gradient(90deg,transparent 0 18%,#7865ad 19% 33%,#b0a0d3 34% 67%,#6b5a9a 68% 82%,transparent 83%),linear-gradient(#4b3d74 0 20%,transparent 20%);clip-path:polygon(28% 0,72% 0,78% 13%,95% 15%,100% 31%,86% 42%,80% 52%,100% 62%,94% 74%,76% 65%,72% 100%,30% 100%,28% 66%,10% 76%,0 65%,20% 48%,14% 34%,5% 18%,25% 14%);filter:drop-shadow(10px 8px 0 #29233e)}
+.world-pixel i{position:absolute;right:-8%;top:42%;width:50%;height:23%;background:#b5a8d4;border:8px solid #665687;box-shadow:10px 10px 0 #342c4b;transform:rotate(-12deg);image-rendering:pixelated}
+.world-entrance b{white-space:nowrap;letter-spacing:.12em}
+.bull-fist{position:absolute;z-index:6;right:-30%;top:44%;width:clamp(160px,28vw,360px);height:clamp(120px,20vw,240px);opacity:0;background:linear-gradient(#eee8ff 0 20%,#a89cc8 20% 74%,#6c608b 75%);clip-path:polygon(100% 15%,42% 15%,42% 0,30% 0,30% 18%,20% 18%,20% 5%,9% 5%,9% 25%,0 25%,0 72%,12% 72%,12% 90%,26% 90%,26% 100%,55% 100%,55% 84%,100% 84%);filter:drop-shadow(0 0 16px #f3e5ff)}
+.bullsheet-overlay.active .bull-fist{animation:ora-punch .7s steps(5,end) 2.15s both}
+.bull-crack{position:absolute;z-index:5;inset:0;opacity:0;background:linear-gradient(104deg,transparent 49.75%,#fff 49.85% 50.15%,transparent 50.25%),linear-gradient(82deg,transparent 41%,#d7e9ff 41.1% 41.25%,transparent 41.35%),linear-gradient(118deg,transparent 60%,#d7e9ff 60.1% 60.25%,transparent 60.35%);clip-path:polygon(49% 0,51% 0,50% 27%,57% 37%,51% 50%,59% 61%,50% 100%,48% 100%,52% 63%,45% 50%,50% 35%)}
+.bullsheet-overlay.impact .bull-crack{opacity:1;animation:crack-bloom .45s steps(4,end) both}
+.bullsheet-overlay[data-mode=world-cut] .bull-crack{clip-path:polygon(0 49%,38% 50%,49% 38%,61% 50%,100% 48%,100% 52%,63% 54%,50% 63%,36% 53%,0 52%)}
+.bullsheet-content{position:absolute;z-index:9;left:50%;bottom:6vh;transform:translateX(-50%);width:min(92vw,680px);padding:18px 22px;border:3px solid #9cecff;background:#07111fea;box-shadow:7px 7px 0 #564888;opacity:0;animation:panel-appear .35s steps(4,end) 2.9s forwards}
+.bullsheet-overlay.active .bullsheet-content{animation:panel-appear .35s steps(4,end) 2.9s forwards}
+.bull-title{font-size:clamp(22px,4.2vw,48px);letter-spacing:.03em}.bullsheet-content p{margin:0;font-size:clamp(11px,1.5vw,16px)}
+.bullsheet-content button{margin-top:5px}
+.bullsheet-overlay[data-mode=world-cut] .dio-entrance{display:none}.bullsheet-overlay[data-mode=world-cut] .world-entrance{animation-delay:.18s}.bullsheet-overlay[data-mode=world-cut] .bull-fist{display:none}.bullsheet-overlay[data-mode=world-cut] .bull-crack{animation:crack-bloom .55s steps(5,end) .65s both;opacity:1}
+@keyframes ambient-rainfall{to{background-position:0 230px,0 310px}}@keyframes screen-flicker{0%,100%{filter:brightness(1)}25%{filter:brightness(2.5)}50%{filter:brightness(.5)}75%{filter:brightness(1.7)}}@keyframes scan-jump{50%{transform:translateY(5px) skewX(4deg)}}@keyframes stop-flash{0%,24%,40%{opacity:.96}12%,32%,100%{opacity:0}}@keyframes dio-point{0%{opacity:0;transform:translate(-50%,-50%) scale(.25)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}30%,78%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-90%,-50%) scale(.85)}}@keyframes world-fly{0%{opacity:0;transform:translate(120vw,-50%) rotateY(-25deg)}20%{opacity:1}78%{opacity:1;transform:translate(-5vw,-50%) rotateY(0)}100%{opacity:0;transform:translate(-12vw,-50%) scale(1.08)}}@keyframes ora-punch{0%{opacity:0;right:-35%;transform:scale(.55) rotate(-12deg)}35%{opacity:1}65%{opacity:1;right:23%;transform:scale(1.2) rotate(8deg)}100%{opacity:0;right:48%;transform:scale(1.4) rotate(-7deg)}}@keyframes crack-bloom{0%{filter:brightness(4);transform:scale(.2)}100%{filter:brightness(1);transform:scale(1)}}@keyframes panel-appear{to{opacity:1}}
+.bullsheet-active>#app,.bullsheet-active>.top,.bullsheet-active>.site-footer,.bullsheet-active>.music-dock,.bullsheet-active>.melanie-sprite,.bullsheet-active>.ambient-rain{filter:grayscale(1) contrast(1.18)}
+@media(max-width:700px){.dio-pixel{width:125px;height:175px}.world-pixel{width:160px;height:190px}.bull-fist{top:43%}.bullsheet-content{bottom:4vh;padding:14px}}
+@media(prefers-reduced-motion:reduce){.ambient-rain{animation:none}.bullsheet-overlay.active,.bullsheet-overlay:before,.dio-entrance,.world-entrance,.bull-fist,.bull-crack,.bullsheet-flash{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+.hero{position:relative}.melanie-corner{top:6px;right:4%;width:clamp(125px,10vw,158px)}@media(max-width:700px){.melanie-corner{top:2px;right:2%;width:clamp(82px,20vw,120px)}}
+.melanie-corner{width:clamp(108px,8vw,128px)}@media(max-width:700px){.melanie-corner{width:clamp(82px,20vw,120px)}}
+/* Render the supplied transparent animation sheets at pixel scale. */
+img.dio-pixel{display:block;width:auto;height:min(70vh,760px);max-width:56vw;aspect-ratio:auto;background:none;clip-path:none;filter:drop-shadow(7px 6px 0 #3c2a56);image-rendering:pixelated}
+img.world-pixel{display:block;width:min(72vw,980px);height:auto;max-height:56vh;object-fit:contain;background:none;clip-path:none;filter:drop-shadow(8px 7px 0 #322642);image-rendering:pixelated}
+.world-entrance{right:4%;top:48%}.dio-entrance{gap:7px}.dio-entrance b{font-size:18px}
+@media(max-width:700px){img.dio-pixel{height:min(62vh,600px);max-width:68vw}img.world-pixel{width:94vw}}

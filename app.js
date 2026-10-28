@@ -5,7 +5,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
 const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
-const ASSET_VERSION = '20261028-14';
+const ASSET_VERSION = '20261028-17';
 let markedPromise;
 let currentTrack = 0;
 const PLAYLIST = [
@@ -46,17 +46,43 @@ function initBullSheet() {
   const reset = document.getElementById('bullsheet-reset');
   const overlay = document.getElementById('bullsheet-overlay');
   if (!reset || !overlay) return;
+  const audio = document.getElementById('site-track');
+  function playStopSfx() {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new Ctx(), now = ctx.currentTime;
+      const tone = (freq, end, start, duration, type, volume) => {
+        const osc = ctx.createOscillator(), amp = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now + start);
+        osc.frequency.exponentialRampToValueAtTime(Math.max(end, 1), now + start + duration);
+        amp.gain.setValueAtTime(.0001, now + start);
+        amp.gain.exponentialRampToValueAtTime(volume, now + start + .025);
+        amp.gain.exponentialRampToValueAtTime(.0001, now + start + duration);
+        osc.connect(amp).connect(ctx.destination);
+        osc.start(now + start); osc.stop(now + start + duration + .03);
+      };
+      tone(1250, 160, 0, .68, 'sawtooth', .18);
+      tone(62, 28, 1.05, .8, 'triangle', .34);
+      tone(100, 34, 2.35, .56, 'square', .28);
+      tone(820, 100, 2.4, .36, 'sawtooth', .12);
+      setTimeout(() => ctx.close(), 4000);
+    } catch (_) { /* Web Audio may be unavailable */ }
+  }
   document.addEventListener('click', e => {
-    if (!e.target.closest('#bullsheet-button')) return;
-    const mode = Math.random() < .5 ? 'time-stop' : 'world-cut';
+    if (!e.target.closest?.('#bullsheet-button')) return;
+    const mode = Math.random() < .72 ? 'dio-world' : 'world-cut';
     overlay.dataset.mode = mode;
-    overlay.querySelector('.bull-title').textContent = mode === 'time-stop' ? 'THE WORLD — TIME STOP!' : 'WORLD CUT — REALITY SPLIT';
-    overlay.querySelector('.bull-sprite').textContent = mode === 'time-stop' ? 'WRYYYY!' : '斬';
-    overlay.classList.remove('active');
+    overlay.querySelector('.bull-title').textContent = mode === 'dio-world' ? 'TIME HAS STOPPED' : 'REALITY, SPLIT IN TWO';
+    overlay.querySelector('.bullsheet-content p').textContent = mode === 'dio-world' ? 'THE WORLD — ORA ORA ORA!' : 'WORLD CUT — DIMENSION SEVERED';
+    if (!audio.paused) audio.pause();
+    playStopSfx();
+    overlay.classList.remove('active', 'impact');
     void overlay.offsetWidth;
     overlay.classList.add('active');
     overlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('bullsheet-active');
+    window.setTimeout(() => overlay.classList.add('impact'), 2300);
   });
   reset.addEventListener('click', () => location.reload());
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('active')) reset.click(); });
@@ -136,7 +162,7 @@ function renderHome() {
   const cats = categories();
   const counts = Object.fromEntries(cats.map(c => [c, DB.filter(w => w.category === c).length]));
   const done = DB.filter(w => w.done).length;
-  app.innerHTML = `<section class="hero"><div class="hero-copy"><p class="event-stamp">BKISC-Recruitment-CTF 2026</p><h1>chlorcale<span>/writeups</span></h1><p class="lede">Sổ tay bài giải CTF — ghi lại cách nghĩ, công cụ và đường đi đến flag.</p></div>
+  app.innerHTML = `<section class="hero"><div class="melanie-corner" aria-hidden="true"><span>Melanie</span><img src="assets/melanie-hcmut.webp" alt=""></div><div class="hero-copy"><p class="event-stamp">BKISC-Recruitment-CTF 2026</p><h1>chlorcale<span>/writeups</span></h1><p class="lede">Sổ tay bài giải CTF — ghi lại cách nghĩ, công cụ và đường đi đến flag.</p></div>
     <div class="overview"><div class="distribution" aria-label="Phân bố bài theo mảng">${cats.map(c => `<button class="dist-segment ${state.cat===c?'selected':''}" data-cat="${esc(c)}" style="--cat:${COLORS[c]||COLORS.misc};--share:${counts[c]/DB.length}" title="${esc(catName(c))}: ${counts[c]} bài" aria-label="Lọc ${esc(catName(c))}, ${counts[c]} bài"></button>`).join('')}</div>
     <div class="dist-labels">${cats.map(c => `<button class="dist-label" data-cat="${esc(c)}"><i style="--cat:${COLORS[c]||COLORS.misc}"></i>${esc(catName(c))} <span>${counts[c]}</span></button>`).join('')}</div>
     <p class="stats"><strong>${DB.length}</strong> bài đã giải <span>·</span> <strong>${done}</strong> bài có writeup</p></div></section>

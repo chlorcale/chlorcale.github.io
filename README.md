@@ -1,4 +1,4 @@
-# chlorcale.github.io
+﻿# chlorcale.github.io
 
 Trang writeup CTF tĩnh, không dùng framework. Nội dung Markdown nằm trong `writeups/`; trình duyệt đọc `writeups/index.json` để dựng danh sách và routing bằng hash (`#/`, `#/w/<slug>`, `#/about`).
 
@@ -35,6 +35,7 @@ python -m http.server 8000
 
 Mở `http://localhost:8000`. Trang tải thư viện nhẹ và font từ CDN được cho phép trong `index.html`; không có bước build ngoài lệnh Python trên.
 
-Trang mang nhãn `BKISC-Recruitment-CTF 2026`, có watermark Chlor dạng chữ C pixel ở nền. Sprite Melanie được xuất từ `Melanie_HCMUT.aseprite` thành PNG/WebP RGBA trong suốt; animation dùng ở trang danh sách và PNG tĩnh dùng khi writeup đang mở hoặc bật giảm chuyển động. Giao diện dùng font Poxiao Pixel tự lưu trong `assets/`, với fallback mono. Playlist nằm trong dock ghim dưới màn hình, trồi lên khi rê chuột hoặc lấy focus; nhạc tiếp tục chạy khi tab nền. Có nút bài trước/sau, chọn bài, tạm dừng và mute/unmute.
+Trang mang nhãn `BKISC-Recruitment-CTF 2026`, có watermark Chlor dạng chữ C pixel ở nền. Sprite Melanie được xuất từ `Melanie_HCMUT.aseprite` thành PNG/WebP RGBA trong suốt; animation dùng ở trang danh sách và PNG tĩnh dùng khi writeup đang mở hoặc bật giảm chuyển động. Giao diện dùng font Poxiao Pixel tự lưu trong `assets/`, với fallback mono. Hiệu ứng Random BullSheet dùng sprite trong suốt DIO/The World từ `assets/dio_and_theworld/`, chuyển thành animation WebP để chạy trong cảnh timestop. Playlist nằm trong dock ghim dưới màn hình, trồi lên khi rê chuột hoặc lấy focus; nhạc tiếp tục chạy khi tab nền. Có nút bài trước/sau, chọn bài, tạm dừng và mute/unmute.
 
 Font Poxiao Pixel được lấy từ [FontPixel](https://fontpixel.com/en/fonts/poxiao-pixel/) và ghi nhận theo SIL Open Font License 1.1; trang nguồn mô tả font ghép từ Fairfax, ZLabs Bitmap và Galmuri.
+
