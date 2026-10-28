@@ -5,7 +5,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
 const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
-const ASSET_VERSION = '20261028-5';
+const ASSET_VERSION = '20261028-7';
 let markedPromise;
 let resumeMusicOnReturn = false;
 let currentTrack = 0;
@@ -46,7 +46,7 @@ function initTheme() {
 function initMusic() {
   const audio = document.getElementById('site-track'), play = document.getElementById('music-toggle'), mute = document.getElementById('music-mute');
   const title = document.getElementById('music-title'), artist = document.getElementById('music-artist'), tracks = [...document.querySelectorAll('.track')];
-  audio.volume = 0.45;
+  audio.volume = 0.28;
   function updateTrack() {
     title.textContent = PLAYLIST[currentTrack].title; artist.textContent = PLAYLIST[currentTrack].artist;
     tracks.forEach((button, i) => { button.classList.toggle('selected', i === currentTrack); button.setAttribute('aria-pressed', String(i === currentTrack)); });
@@ -90,6 +90,8 @@ async function load() {
 }
 function route() {
   const [view, arg] = location.hash.replace(/^#\/?/, '').split('/');
+  document.body.classList.toggle('article-open', view === 'w');
+  document.body.classList.toggle('show-backdrop', view !== 'w');
   document.querySelectorAll('nav a[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === (view === 'about' ? 'about' : 'home')));
   window.scrollTo(0, 0); document.title = 'chlorcale · writeups';
   if (view === 'w') return renderPost(decodeURIComponent(arg || ''));

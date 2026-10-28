@@ -35,4 +35,4 @@ python -m http.server 8000
 
 Mở `http://localhost:8000`. Trang tải thư viện nhẹ và font từ CDN được cho phép trong `index.html`; không có bước build ngoài lệnh Python trên.
 
-Ở cuối trang có pixel-art fan tribute và playlist gồm `Thiệp Hồng Sai Tên` (saxophone) cùng `Đớn Đau Vô Cùng` (lofi). Nhạc chỉ phát sau khi người đọc bấm nút; có nút bài trước/sau, chọn bài, tạm dừng, mute/unmute và tự tạm dừng khi chuyển tab. Tệp audio nằm trong `assets/`.
+Trang danh sách có pixel-art fan tribute Sakamata Chloe làm watermark nền; watermark ẩn trong trang writeup để không ảnh hưởng khả năng đọc. Playlist gồm `Thiệp Hồng Sai Tên` (saxophone) cùng `Đớn Đau Vô Cùng` (lofi), ghim gọn ở cạnh dưới màn hình. Nhạc chỉ phát sau khi bấm nút; có nút bài trước/sau, chọn bài, tạm dừng, mute/unmute và tự tạm dừng khi chuyển tab. Tệp audio nằm trong `assets/`.
