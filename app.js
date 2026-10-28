@@ -5,8 +5,14 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
 const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
-const ASSET_VERSION = '20261028-2';
+const ASSET_VERSION = '20261028-5';
 let markedPromise;
+let resumeMusicOnReturn = false;
+let currentTrack = 0;
+const PLAYLIST = [
+  { title: 'Thiệp Hồng Sai Tên', artist: 'Saxophone · Tạ Trung Đức', src: 'assets/thiep-hong-sai-ten-sax.mp3' },
+  { title: 'Đớn Đau Vô Cùng', artist: 'DATKAA x MHI · Lofi Ver.', src: 'assets/don-dau-vo-cung-lofi.mp3' }
+];
 async function fetchFresh(url) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 10000);
@@ -37,8 +43,48 @@ function initTheme() {
     applyTheme(next); try { localStorage.setItem('theme', next); } catch (_) { /* tiếp tục dùng giao diện trong phiên */ }
   });
 }
+function initMusic() {
+  const audio = document.getElementById('site-track'), play = document.getElementById('music-toggle'), mute = document.getElementById('music-mute');
+  const title = document.getElementById('music-title'), artist = document.getElementById('music-artist'), tracks = [...document.querySelectorAll('.track')];
+  audio.volume = 0.45;
+  function updateTrack() {
+    title.textContent = PLAYLIST[currentTrack].title; artist.textContent = PLAYLIST[currentTrack].artist;
+    tracks.forEach((button, i) => { button.classList.toggle('selected', i === currentTrack); button.setAttribute('aria-pressed', String(i === currentTrack)); });
+  }
+  function showPlayback() {
+    const isPlaying = !audio.paused;
+    play.setAttribute('aria-pressed', String(isPlaying)); play.setAttribute('aria-label', isPlaying ? 'Tạm dừng nhạc' : 'Phát nhạc');
+    play.querySelector('span').textContent = isPlaying ? 'Tạm dừng' : 'Phát'; play.firstChild.textContent = isPlaying ? 'Ⅱ ' : '▶ ';
+  }
+  async function selectTrack(index, autoplay = !audio.paused) {
+    resumeMusicOnReturn = false; audio.pause(); currentTrack = (index + PLAYLIST.length) % PLAYLIST.length;
+    audio.src = PLAYLIST[currentTrack].src; audio.load(); updateTrack(); showPlayback();
+    if (autoplay) { try { await audio.play(); } catch (_) { /* nút phát có thể thử lại */ } showPlayback(); }
+  }
+  audio.src = PLAYLIST[currentTrack].src; updateTrack();
+  tracks.forEach((button, i) => button.addEventListener('click', () => selectTrack(i, true)));
+  document.getElementById('music-prev').addEventListener('click', () => selectTrack(currentTrack - 1));
+  document.getElementById('music-next').addEventListener('click', () => selectTrack(currentTrack + 1));
+  play.addEventListener('click', async () => {
+    if (audio.paused) { try { await audio.play(); } catch (_) { play.querySelector('span').textContent = 'Lỗi phát'; } }
+    else audio.pause();
+    showPlayback();
+  });
+  audio.addEventListener('play', showPlayback); audio.addEventListener('pause', showPlayback);
+  audio.addEventListener('ended', () => selectTrack(currentTrack + 1, true));
+  mute.addEventListener('click', () => {
+    audio.muted = !audio.muted;
+    mute.setAttribute('aria-pressed', String(audio.muted)); mute.setAttribute('aria-label', audio.muted ? 'Bật tiếng' : 'Tắt tiếng');
+    mute.textContent = audio.muted ? '🔇' : '🔊';
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && !audio.paused) { resumeMusicOnReturn = true; audio.pause(); }
+    else if (!document.hidden && resumeMusicOnReturn) { resumeMusicOnReturn = false; audio.play().catch(() => {}); }
+  });
+}
 async function load() {
   initTheme();
+  initMusic();
   try { const r = await fetchFresh('writeups/index.json'); if (!r.ok) throw new Error('index'); DB = await r.json(); route(); }
   catch (_) { app.innerHTML = '<p class="muted">Không tải được danh sách bài. Kiểm tra kết nối rồi <button type="button" onclick="location.reload()">thử tải lại</button>.</p>'; }
 }
