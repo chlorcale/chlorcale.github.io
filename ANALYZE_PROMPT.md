@@ -1,25 +1,33 @@
-# Prompt để paste cùng lời giải vào AI
+# Prompt viết writeup
 
-Dán đoạn dưới đây, rồi dán đề + lời giải / code / log của bạn ở cuối. Lưu kết quả thành `writeups/<slug>.md` (slug xem trong `challenges.json`, ví dụ `squared-lcg`), rồi chạy `python ctf.py build`.
-Tên bài, mảng, điểm và thời gian giải đã nằm trong `challenges.json` nên AI không cần viết lại.
+Dán nội dung dưới đây cùng đề bài và lời giải. Lưu kết quả thành `writeups/<slug>.md` (slug lấy từ `challenges.json`), rồi chạy `python ctf.py build`.
 
 ---
 
-Bạn là người viết writeup CTF. Dưới đây là đề bài và lời giải của tôi. Hãy viết lại thành một file Markdown bằng tiếng Việt theo đúng khuôn sau. Không bịa chi tiết không có trong lời giải; chỗ nào thiếu thì ghi "TODO: ...".
+Bạn là người viết writeup CTF. Hãy viết lại đề bài và lời giải tôi cung cấp thành một tệp Markdown bằng tiếng Việt. Không bịa chi tiết; phần thiếu ghi `TODO: ...`.
 
-1. Bắt đầu bằng front matter:
+Bắt đầu bằng front matter:
+
+```yaml
+---
+title: Tên bài
+category: crypto
+techniques: kỹ-thuật-1, kỹ-thuật-2
+summary: Một câu tóm tắt cách giải.
+---
 ```
----
-techniques: kỹ thuật 1, kỹ thuật 2, ...
-summary: một câu mô tả cách giải
----
-```
-   Tên kỹ thuật ngắn, viết thường, nối bằng gạch ngang, ví dụ `lcg-state-recovery`, `sign-ambiguity`, `modular-inverse`, `aes-ecb`.
 
-2. Các mục theo đúng thứ tự:
-   - `## Đề bài`: tóm tắt đề và điều kiện quan trọng.
-   - `## Kỹ thuật sử dụng`: danh sách gạch đầu dòng, mỗi dòng dạng `- **tên kỹ thuật**: dùng ở bước nào và ý tưởng chính`. Giải thích công thức ngắn gọn.
-   - `## Cách giải`: chia thành `### Bước 1`, `### Bước 2`, ... Mỗi bước nêu ý nghĩ rồi tới code. Ghi rõ chỗ tôi từng sai hoặc vướng và cách sửa.
-   - `## Flag`: flag đặt trong dấu backtick.
+Giữ nguyên tên và slug đã có. `title` và `category` chỉ cần có nếu bài chưa có trong `challenges.json`.
 
-[Dán đề + lời giải ở đây]
+Các mục theo đúng thứ tự:
+
+1. `## Đề bài`: tóm tắt đề và điều kiện quan trọng.
+2. `## Kỹ thuật sử dụng`: danh sách dạng `- **tên-kỹ-thuật**: bước áp dụng và ý tưởng chính`.
+3. `## Cách giải`: chia thành `### Bước 1`, `### Bước 2`, ...; nêu ý tưởng rồi tới code, ghi lại lỗi/vướng mắc nếu lời giải có đề cập.
+4. `## Flag`: flag đặt trong dấu backtick.
+
+Nếu writeup chưa hoàn chỉnh, giữ dòng `<!-- TODO-WRITEUP -->` để chỉ mục nhận biết bài chưa viết xong. Không thêm điểm hoặc thời gian giải.
+
+---
+
+[Dán đề bài và lời giải ở đây]

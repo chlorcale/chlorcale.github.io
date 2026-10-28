@@ -3,8 +3,6 @@
     "slug": "squared-lcg",
     "title": "Squared LCG",
     "category": "crypto",
-    "points": 525,
-    "solved": "2026-10-27 16:47:50",
     "done": true,
     "techniques": [
       "lcg-state-recovery",
@@ -19,8 +17,6 @@
     "slug": "nta-1-intro-to-network-traffic-analysis",
     "title": "NTA 1 - Intro to Network Traffic Analysis",
     "category": "forensics",
-    "points": 752,
-    "solved": "2026-10-27 07:43:15",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -29,8 +25,6 @@
     "slug": "darling",
     "title": "Darling",
     "category": "pwn",
-    "points": 661,
-    "solved": "2026-10-27 01:03:42",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -39,8 +33,6 @@
     "slug": "hide-n-seek",
     "title": "Hide n Seek",
     "category": "forensics",
-    "points": 752,
-    "solved": "2026-10-27 00:12:53",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -49,8 +41,6 @@
     "slug": "backup",
     "title": "Backup",
     "category": "forensics",
-    "points": 525,
-    "solved": "2026-10-26 23:35:24",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -59,8 +49,6 @@
     "slug": "ballon-d-or",
     "title": "Ballon d'Or",
     "category": "pwn",
-    "points": 586,
-    "solved": "2026-10-26 22:40:38",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -69,8 +57,6 @@
     "slug": "digital-systems",
     "title": "Digital Systems",
     "category": "pwn",
-    "points": 259,
-    "solved": "2026-10-26 21:13:28",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -79,8 +65,6 @@
     "slug": "exam-leaked",
     "title": "Exam Leaked",
     "category": "forensics",
-    "points": 270,
-    "solved": "2026-10-26 13:51:01",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -89,8 +73,6 @@
     "slug": "a-veil-of-mist",
     "title": "a Veil of Mist",
     "category": "reverse",
-    "points": 752,
-    "solved": "2026-10-26 13:20:21",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -99,8 +81,6 @@
     "slug": "take-me-to-church",
     "title": "Take me to Church",
     "category": "reverse",
-    "points": 475,
-    "solved": "2026-10-26 12:41:22",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -109,8 +89,6 @@
     "slug": "slow-flag",
     "title": "Slow Flag",
     "category": "reverse",
-    "points": 525,
-    "solved": "2026-10-26 12:22:28",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -119,8 +97,6 @@
     "slug": "please-do-reverse",
     "title": "Please do Reverse",
     "category": "reverse",
-    "points": 255,
-    "solved": "2026-10-26 10:36:20",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -129,8 +105,6 @@
     "slug": "embedding",
     "title": "Embedding",
     "category": "crypto",
-    "points": 586,
-    "solved": "2026-10-26 10:05:54",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -139,8 +113,6 @@
     "slug": "carry-me",
     "title": "Carry Me",
     "category": "crypto",
-    "points": 434,
-    "solved": "2026-10-26 09:58:00",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -149,8 +121,6 @@
     "slug": "admin-portal",
     "title": "Admin Portal",
     "category": "web",
-    "points": 259,
-    "solved": "2026-10-26 09:52:35",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -159,8 +129,6 @@
     "slug": "two-bit-oracle",
     "title": "Two-bit oracle",
     "category": "crypto",
-    "points": 752,
-    "solved": "2026-10-26 09:40:16",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -169,8 +137,6 @@
     "slug": "netcat-101",
     "title": "Netcat 101",
     "category": "misc",
-    "points": 125,
-    "solved": "2026-10-26 09:31:29",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -179,8 +145,6 @@
     "slug": "sanity-check",
     "title": "Sanity Check",
     "category": "misc",
-    "points": 251,
-    "solved": "2026-10-26 09:30:03",
     "done": false,
     "techniques": [],
     "summary": ""
@@ -189,8 +153,6 @@
     "slug": "rsa",
     "title": "RSA?",
     "category": "crypto",
-    "points": 373,
-    "solved": "2026-10-26 09:28:57",
     "done": false,
     "techniques": [],
     "summary": ""

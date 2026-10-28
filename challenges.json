@@ -2,134 +2,96 @@
   {
     "slug": "squared-lcg",
     "title": "Squared LCG",
-    "category": "crypto",
-    "points": 525,
-    "solved": "2026-10-27 16:47:50"
+    "category": "crypto"
   },
   {
     "slug": "nta-1-intro-to-network-traffic-analysis",
     "title": "NTA 1 - Intro to Network Traffic Analysis",
-    "category": "forensics",
-    "points": 752,
-    "solved": "2026-10-27 07:43:15"
+    "category": "forensics"
   },
   {
     "slug": "darling",
     "title": "Darling",
-    "category": "pwn",
-    "points": 661,
-    "solved": "2026-10-27 01:03:42"
+    "category": "pwn"
   },
   {
     "slug": "hide-n-seek",
     "title": "Hide n Seek",
-    "category": "forensics",
-    "points": 752,
-    "solved": "2026-10-27 00:12:53"
+    "category": "forensics"
   },
   {
     "slug": "backup",
     "title": "Backup",
-    "category": "forensics",
-    "points": 525,
-    "solved": "2026-10-26 23:35:24"
+    "category": "forensics"
   },
   {
     "slug": "ballon-d-or",
     "title": "Ballon d'Or",
-    "category": "pwn",
-    "points": 586,
-    "solved": "2026-10-26 22:40:38"
+    "category": "pwn"
   },
   {
     "slug": "digital-systems",
     "title": "Digital Systems",
-    "category": "pwn",
-    "points": 259,
-    "solved": "2026-10-26 21:13:28"
+    "category": "pwn"
   },
   {
     "slug": "exam-leaked",
     "title": "Exam Leaked",
-    "category": "forensics",
-    "points": 270,
-    "solved": "2026-10-26 13:51:01"
+    "category": "forensics"
   },
   {
     "slug": "a-veil-of-mist",
     "title": "a Veil of Mist",
-    "category": "reverse",
-    "points": 752,
-    "solved": "2026-10-26 13:20:21"
+    "category": "reverse"
   },
   {
     "slug": "take-me-to-church",
     "title": "Take me to Church",
-    "category": "reverse",
-    "points": 475,
-    "solved": "2026-10-26 12:41:22"
+    "category": "reverse"
   },
   {
     "slug": "slow-flag",
     "title": "Slow Flag",
-    "category": "reverse",
-    "points": 525,
-    "solved": "2026-10-26 12:22:28"
+    "category": "reverse"
   },
   {
     "slug": "please-do-reverse",
     "title": "Please do Reverse",
-    "category": "reverse",
-    "points": 255,
-    "solved": "2026-10-26 10:36:20"
+    "category": "reverse"
   },
   {
     "slug": "embedding",
     "title": "Embedding",
-    "category": "crypto",
-    "points": 586,
-    "solved": "2026-10-26 10:05:54"
+    "category": "crypto"
   },
   {
     "slug": "carry-me",
     "title": "Carry Me",
-    "category": "crypto",
-    "points": 434,
-    "solved": "2026-10-26 09:58:00"
+    "category": "crypto"
   },
   {
     "slug": "admin-portal",
     "title": "Admin Portal",
-    "category": "web",
-    "points": 259,
-    "solved": "2026-10-26 09:52:35"
+    "category": "web"
   },
   {
     "slug": "two-bit-oracle",
     "title": "Two-bit oracle",
-    "category": "crypto",
-    "points": 752,
-    "solved": "2026-10-26 09:40:16"
+    "category": "crypto"
   },
   {
     "slug": "netcat-101",
     "title": "Netcat 101",
-    "category": "misc",
-    "points": 125,
-    "solved": "2026-10-26 09:31:29"
+    "category": "misc"
   },
   {
     "slug": "sanity-check",
     "title": "Sanity Check",
-    "category": "misc",
-    "points": 251,
-    "solved": "2026-10-26 09:30:03"
+    "category": "misc"
   },
   {
     "slug": "rsa",
     "title": "RSA?",
-    "category": "crypto",
-    "points": 373,
-    "solved": "2026-10-26 09:28:57"
+    "category": "crypto"
   }
 ]
