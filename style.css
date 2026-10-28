@@ -214,3 +214,18 @@ img.world-pixel{width:clamp(500px,56vw,1000px);max-height:none;filter:drop-shado
 .bullsheet-active #app{animation:site-stop-glitch .34s steps(2,end) 4}
 @keyframes site-stop-glitch{0%,100%{filter:grayscale(1) contrast(1.12)}35%{filter:grayscale(1) contrast(1.5) translateX(3px)}70%{filter:grayscale(1) contrast(.8) translateX(-2px)}}
 @media(prefers-reduced-motion:reduce){.bullsheet-active #app{animation:none}}
+
+/* Rain is one full-screen animation, rather than repeated vertical strips. */
+.ambient-rain{background-image:url("assets/rain.gif");background-size:cover;background-position:center;background-repeat:no-repeat;opacity:.22;mask-image:none;animation:none;mix-blend-mode:screen}
+/* The World starts at DIO's pointing position only after his pose settles. */
+.world-entrance{top:50%;right:50%;opacity:0;transform:translate(50%,-50%) scale(.01);transform-origin:center;animation:none}
+.bullsheet-overlay.world-arrived .world-entrance{animation:world-charge 1.55s steps(8,end) both}
+img.world-pixel{width:min(88vw,130vh);height:auto;max-height:none;object-fit:contain;}
+.world-entrance b{display:none}
+@keyframes world-charge{0%{opacity:0;transform:translate(50%,-50%) scale(.01)}8%{opacity:1}58%{opacity:1;transform:translate(50%,-50%) scale(.74)}100%{opacity:.97;transform:translate(50%,-50%) scale(1.36)}}
+/* Use the user's crack cutout as a translucent, pixel stepped glass overlay. */
+.bull-crack{background-image:url("assets/crack-overlay.png");background-size:100% 100%;background-position:center;background-repeat:no-repeat;image-rendering:pixelated;opacity:0;mix-blend-mode:screen}
+.bullsheet-overlay.impact .bull-crack{opacity:.9;animation:crack-bloom .3s steps(3,end) both}
+@media(max-width:700px){.ambient-rain{opacity:.16}.world-entrance{top:50%}img.world-pixel{width:min(98vw,130vh)}}
+#dio-sfx{display:none}
+@keyframes site-stop-glitch{0%,100%{filter:grayscale(1) contrast(1.12);transform:none}35%{filter:grayscale(1) contrast(1.5);transform:translateX(3px)}70%{filter:grayscale(1) contrast(.8);transform:translateX(-2px)}}

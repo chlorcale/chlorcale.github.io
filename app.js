@@ -5,7 +5,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
 const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
-const ASSET_VERSION = '20261028-19';
+const ASSET_VERSION = '20261028-21';
 let markedPromise;
 let currentTrack = 0;
 const PLAYLIST = [
@@ -47,54 +47,48 @@ function initBullSheet() {
   const overlay = document.getElementById('bullsheet-overlay');
   if (!reset || !overlay) return;
   const audio = document.getElementById('site-track');
+  const stopSfx = document.getElementById('dio-sfx');
   const dioSprite = overlay.querySelector('.dio-pixel'), worldSprite = overlay.querySelector('.world-pixel');
-  const dioSrc = dioSprite.src, worldSrc = worldSprite.src;
-  let musicWasPlaying = false, effectTimer, impactTimer;
+  const dioSrc = dioSprite.src;
+  let musicWasPlaying = false, effectTimer, impactTimer, spriteTimers = [];
+  const worldFrames = [0,1,2,3].map(i => `assets/dio_and_theworld/the-world-pose-${i}.png`);
+  const dioHold = 'assets/dio_and_theworld/dio-point-hold.png';
   function playStopSfx() {
-    try {
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      const ctx = new Ctx(), now = ctx.currentTime;
-      const tone = (freq, end, start, duration, type, volume) => {
-        const osc = ctx.createOscillator(), amp = ctx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, now + start);
-        osc.frequency.exponentialRampToValueAtTime(Math.max(end, 1), now + start + duration);
-        amp.gain.setValueAtTime(.0001, now + start);
-        amp.gain.exponentialRampToValueAtTime(volume, now + start + .025);
-        amp.gain.exponentialRampToValueAtTime(.0001, now + start + duration);
-        osc.connect(amp).connect(ctx.destination);
-        osc.start(now + start); osc.stop(now + start + duration + .03);
-      };
-      tone(1250, 160, 0, .68, 'sawtooth', .18);
-      tone(62, 28, 1.05, .8, 'triangle', .34);
-      tone(100, 34, 2.35, .56, 'square', .28);
-      tone(820, 100, 2.4, .36, 'sawtooth', .12);
-      setTimeout(() => ctx.close(), 4000);
-    } catch (_) { /* Web Audio may be unavailable */ }
+    stopSfx.currentTime = 0;
+    stopSfx.play().catch(() => {});
   }
   document.addEventListener('click', e => {
     if (!e.target.closest?.('#bullsheet-button')) return;
     if (overlay.classList.contains('active')) return;
-    clearTimeout(effectTimer); clearTimeout(impactTimer);
-    dioSprite.removeAttribute('src'); worldSprite.removeAttribute('src');
-    requestAnimationFrame(() => { dioSprite.src = dioSrc; worldSprite.src = worldSrc; });
+    clearTimeout(effectTimer); clearTimeout(impactTimer); spriteTimers.forEach(clearTimeout); spriteTimers = [];
+    dioSprite.removeAttribute('src'); worldSprite.src = worldFrames[0];
+    requestAnimationFrame(() => { dioSprite.src = dioSrc; });
     musicWasPlaying = !audio.paused;
     if (!audio.paused) audio.pause();
     playStopSfx();
-    overlay.classList.remove('active', 'impact');
+    overlay.classList.remove('active', 'impact', 'world-arrived');
     void overlay.offsetWidth;
     overlay.classList.add('active');
     overlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('bullsheet-active');
-    impactTimer = window.setTimeout(() => overlay.classList.add('impact'), 2500);
-    effectTimer = window.setTimeout(() => resetScene(), 8500);
+    spriteTimers.push(window.setTimeout(() => { dioSprite.src = dioHold; }, 1320));
+    spriteTimers.push(window.setTimeout(() => {
+      overlay.classList.add('world-arrived');
+      let i = 1;
+      const nextFrame = () => { if (i < worldFrames.length) { worldSprite.src = worldFrames[i++]; spriteTimers.push(window.setTimeout(nextFrame, 175)); } };
+      spriteTimers.push(window.setTimeout(nextFrame, 175));
+    }, 1760));
+    impactTimer = window.setTimeout(() => overlay.classList.add('impact'), 3300);
+    effectTimer = window.setTimeout(() => resetScene(), 8200);
   });
   function resetScene() {
     clearTimeout(effectTimer);
-    clearTimeout(impactTimer);
+    clearTimeout(impactTimer); spriteTimers.forEach(clearTimeout); spriteTimers = [];
     overlay.classList.remove('active', 'impact');
+    overlay.classList.remove('world-arrived');
     overlay.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('bullsheet-active');
+    stopSfx.pause(); stopSfx.currentTime = 0;
     if (musicWasPlaying) audio.play().catch(() => {});
     musicWasPlaying = false;
   }
