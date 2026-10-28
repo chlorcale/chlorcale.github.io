@@ -85,3 +85,18 @@ article{font-size:19px;line-height:1.9}.post-head h1{font-size:clamp(38px,5vw,62
 @media(max-width:700px){.melanie-sprite{left:10px;bottom:62px;width:clamp(106px,24vw,148px)}.music-dock .dock-strip{height:50px;min-height:50px}}
 @media(max-width:420px){.melanie-sprite{left:6px;bottom:58px;width:96px}}
 
+
+/* Reduce visual clutter and use a readable text face inside writeups. */
+body{background-image:linear-gradient(color-mix(in srgb,var(--line) 22%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--line) 22%,transparent) 1px,transparent 1px);background-size:32px 32px}
+body:before{opacity:.83}
+.page-backdrop{display:none!important}
+.backdrop-terminal{display:none!important}
+body.article-open article{font-family:Inter,Arial,sans-serif;font-size:18px;line-height:1.85;letter-spacing:0}
+body.article-open article p,body.article-open article li,body.article-open article blockquote{font-family:Inter,Arial,sans-serif;font-size:18px;line-height:1.85;letter-spacing:0}
+body.article-open article h2,body.article-open article h3{font-family:Inter,Arial,sans-serif;letter-spacing:0}
+body.article-open article code,body.article-open article pre,body.article-open article pre code{font-family:"JetBrains Mono","Cascadia Code",monospace;font-size:.88em;letter-spacing:0}
+body.article-open .toc,body.article-open .post-head,body.article-open .post-nav{font-family:Inter,Arial,sans-serif;letter-spacing:0}
+.melanie-sprite{left:18px;bottom:74px;width:clamp(122px,11vw,170px);opacity:.94}
+.melanie-sprite .sprite-name{font-size:12px}
+@media(max-width:700px){body.article-open article,body.article-open article p,body.article-open article li,body.article-open article blockquote{font-size:17px}.melanie-sprite{left:8px;bottom:66px;width:clamp(90px,21vw,122px)}}
+@media(max-width:420px){body.article-open article,body.article-open article p,body.article-open article li,body.article-open article blockquote{font-size:16px}.melanie-sprite{left:5px;bottom:62px;width:86px}}
