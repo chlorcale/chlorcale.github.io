@@ -1,13 +1,12 @@
-const app = document.getElementById('app');
+﻿const app = document.getElementById('app');
 const CATS = { crypto: 'Crypto', forensics: 'Forensics', pwn: 'Pwn', reverse: 'Reverse', web: 'Web', misc: 'Misc' };
 const COLORS = { crypto: 'var(--cat-crypto)', forensics: 'var(--cat-forensics)', pwn: 'var(--cat-pwn)', reverse: 'var(--cat-reverse)', web: 'var(--cat-web)', misc: 'var(--cat-misc)' };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
-const ASSET_VERSION = '20261028-9';
+const ASSET_VERSION = '20261028-12';
 let markedPromise;
-let resumeMusicOnReturn = false;
 let currentTrack = 0;
 const PLAYLIST = [
   { title: 'Thiệp Hồng Sai Tên', artist: 'Saxophone · Tạ Trung Đức', src: 'assets/thiep-hong-sai-ten-sax.mp3' },
@@ -45,10 +44,26 @@ function initTheme() {
 }
 function initMusic() {
   const audio = document.getElementById('site-track'), play = document.getElementById('music-toggle'), mute = document.getElementById('music-mute');
-  const title = document.getElementById('music-title'), artist = document.getElementById('music-artist'), tracks = [...document.querySelectorAll('.track')];
+  const title = document.getElementById('music-title'), dockTitle = document.getElementById('dock-title'), artist = document.getElementById('music-artist'), tracks = [...document.querySelectorAll('.track')];
+  const dock = document.getElementById('music-dock'), panelToggle = document.getElementById('music-panel-toggle'), panel = document.getElementById('music-dock-panel');
   audio.volume = 0.28;
+  let pointerOpening = false;
+  function setDockOpen(open) {
+    dock.classList.toggle('is-open', open); panelToggle.setAttribute('aria-expanded', String(open)); panel.setAttribute('aria-hidden', String(!open)); panel.inert = !open;
+  }
+  setDockOpen(false);
+  panelToggle.addEventListener('pointerdown', e => { pointerOpening = e.pointerType !== 'mouse'; });
+  panelToggle.addEventListener('click', e => {
+    if (matchMedia('(hover: hover) and (pointer: fine)').matches || e.detail === 0) setDockOpen(true);
+    else setDockOpen(!dock.classList.contains('is-open'));
+    pointerOpening = false;
+  });
+  dock.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') setDockOpen(true); });
+  dock.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { if (dock.contains(document.activeElement)) document.activeElement.blur(); setDockOpen(false); } });
+  dock.addEventListener('focusin', e => { if (e.target !== panelToggle || !pointerOpening) setDockOpen(true); });
+  dock.addEventListener('focusout', e => { if (!dock.contains(e.relatedTarget)) setDockOpen(false); });
   function updateTrack() {
-    title.textContent = PLAYLIST[currentTrack].title; artist.textContent = PLAYLIST[currentTrack].artist;
+    title.textContent = PLAYLIST[currentTrack].title; dockTitle.textContent = PLAYLIST[currentTrack].title; artist.textContent = PLAYLIST[currentTrack].artist;
     tracks.forEach((button, i) => { button.classList.toggle('selected', i === currentTrack); button.setAttribute('aria-pressed', String(i === currentTrack)); });
   }
   function showPlayback() {
@@ -57,7 +72,7 @@ function initMusic() {
     play.querySelector('span').textContent = isPlaying ? 'Tạm dừng' : 'Phát'; play.firstChild.textContent = isPlaying ? 'Ⅱ ' : '▶ ';
   }
   async function selectTrack(index, autoplay = !audio.paused) {
-    resumeMusicOnReturn = false; audio.pause(); currentTrack = (index + PLAYLIST.length) % PLAYLIST.length;
+    audio.pause(); currentTrack = (index + PLAYLIST.length) % PLAYLIST.length;
     audio.src = PLAYLIST[currentTrack].src; audio.load(); updateTrack(); showPlayback();
     if (autoplay) { try { await audio.play(); } catch (_) { /* nút phát có thể thử lại */ } showPlayback(); }
   }
@@ -77,10 +92,6 @@ function initMusic() {
     mute.setAttribute('aria-pressed', String(audio.muted)); mute.setAttribute('aria-label', audio.muted ? 'Bật tiếng' : 'Tắt tiếng');
     mute.textContent = audio.muted ? '🔇' : '🔊';
   });
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden && !audio.paused) { resumeMusicOnReturn = true; audio.pause(); }
-    else if (!document.hidden && resumeMusicOnReturn) { resumeMusicOnReturn = false; audio.play().catch(() => {}); }
-  });
 }
 async function load() {
   initTheme();
@@ -92,9 +103,8 @@ function route() {
   const [view, arg] = location.hash.replace(/^#\/?/, '').split('/');
   document.body.classList.toggle('article-open', view === 'w');
   document.body.classList.toggle('show-backdrop', view !== 'w');
-  const melanie = document.querySelector('.melanie-video');
-  if (view === 'w' || matchMedia('(prefers-reduced-motion: reduce)').matches) melanie.pause();
-  else melanie.play().catch(() => {});
+  const melanie = document.querySelector('.melanie-art');
+  melanie.src = view === 'w' || matchMedia('(prefers-reduced-motion: reduce)').matches ? melanie.dataset.still : melanie.dataset.animation;
   document.querySelectorAll('nav a[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === (view === 'about' ? 'about' : 'home')));
   window.scrollTo(0, 0); document.title = 'BKISC-Recruitment-CTF 2026 · chlorcale/writeups';
   if (view === 'w') return renderPost(decodeURIComponent(arg || ''));
@@ -178,3 +188,4 @@ async function renderPost(slug){
 function postNav(idx){return `<nav class="post-nav" aria-label="Điều hướng bài">${idx>0?`<a href="#/w/${encodeURIComponent(DB[idx-1].slug)}">← ${esc(DB[idx-1].title)}</a>`:'<span></span>'}${idx<DB.length-1?`<a class="next" href="#/w/${encodeURIComponent(DB[idx+1].slug)}">${esc(DB[idx+1].title)} →</a>`:''}</nav>`;}
 function renderAbout(){app.innerHTML='<section class="about"><h1>Giới thiệu</h1><p>Sổ tay writeup CTF của <a href="https://github.com/chlorcale">chlorcale</a>. Mỗi bài lưu lại đề bài, kỹ thuật sử dụng và cách giải theo từng bước.</p></section>';}
 addEventListener('hashchange',route);load();
+
