@@ -229,3 +229,6 @@ img.world-pixel{width:min(88vw,130vh);height:auto;max-height:none;object-fit:con
 @media(max-width:700px){.ambient-rain{opacity:.16}.world-entrance{top:50%}img.world-pixel{width:min(98vw,130vh)}}
 #dio-sfx{display:none}
 @keyframes site-stop-glitch{0%,100%{filter:grayscale(1) contrast(1.12);transform:none}35%{filter:grayscale(1) contrast(1.5);transform:translateX(3px)}70%{filter:grayscale(1) contrast(.8);transform:translateX(-2px)}}
+/* DIO keeps a locked size and position while descending; no bounce or sway. */
+.dio-entrance{left:50%;top:50%;animation:dio-drop-point 1.65s steps(12,end) .08s both}
+@keyframes dio-drop-point{0%{opacity:0;transform:translate(-50%,-170vh)}18%{opacity:1;transform:translate(-50%,-140vh)}100%{opacity:1;transform:translate(-50%,-50%)}}
