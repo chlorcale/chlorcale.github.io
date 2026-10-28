@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap&subset=vietnamese">
-<link rel="stylesheet" href="style.css?v=20261028-8">
+<link rel="stylesheet" href="style.css?v=20261028-9">
 </head>
 <body>
 <header class="top">
@@ -36,11 +36,7 @@
 </div>
 <div id="melanie-sprite" class="melanie-sprite" role="img" aria-label="Melanie, sprite pixel chuyển động">
   <span class="sprite-name">Melanie</span>
-  <svg viewBox="0 0 64 80" aria-hidden="true" shape-rendering="crispEdges">
-    <g class="melanie-body"><rect x="20" y="3" width="24" height="5" fill="#252944"/><rect x="12" y="8" width="40" height="8" fill="#8b70c8"/><rect x="7" y="16" width="50" height="21" fill="#8b70c8"/><rect x="12" y="16" width="40" height="25" fill="#f1d4c7"/><rect x="7" y="20" width="9" height="17" fill="#252944"/><rect x="48" y="20" width="9" height="17" fill="#252944"/><rect x="17" y="12" width="8" height="13" fill="#f4f0ff"/><rect x="39" y="12" width="8" height="13" fill="#f4f0ff"/><rect x="15" y="31" width="5" height="3" fill="#e793aa"/><rect x="44" y="31" width="5" height="3" fill="#e793aa"/><rect x="27" y="35" width="10" height="3" fill="#aa6178"/><rect x="12" y="41" width="40" height="7" fill="#252944"/><rect x="16" y="48" width="32" height="19" fill="#50678e"/><rect x="26" y="48" width="12" height="12" fill="#f4f0ff"/><rect x="28" y="51" width="8" height="9" fill="#e793aa"/><rect x="20" y="67" width="9" height="8" fill="#252944"/><rect x="36" y="67" width="9" height="8" fill="#252944"/><rect x="3" y="11" width="8" height="5" fill="#f4f0ff"/><rect x="53" y="11" width="8" height="5" fill="#f4f0ff"/></g>
-    <g class="melanie-eyes"><rect x="20" y="25" width="5" height="5" fill="#322b49"/><rect x="39" y="25" width="5" height="5" fill="#322b49"/></g>
-    <rect x="1" y="77" width="62" height="3" fill="#8b70c8" opacity=".65"/>
-  </svg>
+  <video class="melanie-video" muted loop playsinline preload="none" aria-hidden="true"><source src="assets/melanie-hcmut.mp4" type="video/mp4"></video>
 </div>
 <main id="app"><p class="muted">Đang tải…</p></main>
 <footer class="site-footer">
@@ -52,6 +48,6 @@
   <div class="player-controls"><button id="music-prev" type="button" aria-label="Bài trước">◂|</button><button id="music-toggle" type="button" aria-label="Phát nhạc" aria-pressed="false">▶ <span>Phát</span></button><button id="music-next" type="button" aria-label="Bài tiếp theo">|▸</button><button id="music-mute" type="button" aria-label="Tắt tiếng" aria-pressed="false">🔊</button></div>
   <audio id="site-track" preload="none"></audio>
 </aside>
-<script src="app.js?v=20261028-8"></script>
+<script src="app.js?v=20261028-9"></script>
 </body>
 </html>
