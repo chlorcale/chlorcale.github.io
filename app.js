@@ -5,7 +5,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
 const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
-const ASSET_VERSION = '20261028-12';
+const ASSET_VERSION = '20261028-14';
 let markedPromise;
 let currentTrack = 0;
 const PLAYLIST = [
@@ -41,6 +41,25 @@ function initTheme() {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     applyTheme(next); try { localStorage.setItem('theme', next); } catch (_) { /* tiếp tục dùng giao diện trong phiên */ }
   });
+}
+function initBullSheet() {
+  const reset = document.getElementById('bullsheet-reset');
+  const overlay = document.getElementById('bullsheet-overlay');
+  if (!reset || !overlay) return;
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#bullsheet-button')) return;
+    const mode = Math.random() < .5 ? 'time-stop' : 'world-cut';
+    overlay.dataset.mode = mode;
+    overlay.querySelector('.bull-title').textContent = mode === 'time-stop' ? 'THE WORLD — TIME STOP!' : 'WORLD CUT — REALITY SPLIT';
+    overlay.querySelector('.bull-sprite').textContent = mode === 'time-stop' ? 'WRYYYY!' : '斬';
+    overlay.classList.remove('active');
+    void overlay.offsetWidth;
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('bullsheet-active');
+  });
+  reset.addEventListener('click', () => location.reload());
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('active')) reset.click(); });
 }
 function initMusic() {
   const audio = document.getElementById('site-track'), play = document.getElementById('music-toggle'), mute = document.getElementById('music-mute');
@@ -96,6 +115,7 @@ function initMusic() {
 async function load() {
   initTheme();
   initMusic();
+  initBullSheet();
   try { const r = await fetchFresh('writeups/index.json'); if (!r.ok) throw new Error('index'); DB = await r.json(); route(); }
   catch (_) { app.innerHTML = '<p class="muted">Không tải được danh sách bài. Kiểm tra kết nối rồi <button type="button" onclick="location.reload()">thử tải lại</button>.</p>'; }
 }
@@ -132,8 +152,8 @@ function card(w) {
 function drawList() {
   const cats = categories(), filters=document.getElementById('filters');
   if (!filters) return;
-  filters.innerHTML = `<button class="filter ${state.cat==='all'?'active':''}" data-filter="all" aria-pressed="${state.cat==='all'}">Tất cả</button>`+cats.map(c=>`<button class="filter ${state.cat===c?'active':''}" data-filter="${esc(c)}" aria-pressed="${state.cat===c}">${esc(catName(c))}</button>`).join('');
-  filters.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.cat=b.dataset.filter;renderHome();}));
+  filters.innerHTML = `<button class="filter ${state.cat==='all'?'active':''}" data-filter="all" aria-pressed="${state.cat==='all'}">Tất cả</button>`+cats.map(c=>`<button class="filter ${state.cat===c?'active':''}" data-filter="${esc(c)}" aria-pressed="${state.cat===c}">${esc(catName(c))}</button>`).join('')+'<button id="bullsheet-button" class="filter bullsheet-button" type="button">Random BullSheet</button>';
+  filters.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{state.cat=b.dataset.filter;renderHome();}));
   const q=state.q.trim().toLocaleLowerCase('vi');
   const rows=DB.filter(w=>(state.cat==='all'||w.category===state.cat)&&(!q||w.title.toLocaleLowerCase('vi').includes(q)));
   const el=document.getElementById('list');
@@ -188,4 +208,5 @@ async function renderPost(slug){
 function postNav(idx){return `<nav class="post-nav" aria-label="Điều hướng bài">${idx>0?`<a href="#/w/${encodeURIComponent(DB[idx-1].slug)}">← ${esc(DB[idx-1].title)}</a>`:'<span></span>'}${idx<DB.length-1?`<a class="next" href="#/w/${encodeURIComponent(DB[idx+1].slug)}">${esc(DB[idx+1].title)} →</a>`:''}</nav>`;}
 function renderAbout(){app.innerHTML='<section class="about"><h1>Giới thiệu</h1><p>Sổ tay writeup CTF của <a href="https://github.com/chlorcale">chlorcale</a>. Mỗi bài lưu lại đề bài, kỹ thuật sử dụng và cách giải theo từng bước.</p></section>';}
 addEventListener('hashchange',route);load();
+
 

@@ -100,3 +100,34 @@ body.article-open .toc,body.article-open .post-head,body.article-open .post-nav{
 .melanie-sprite .sprite-name{font-size:12px}
 @media(max-width:700px){body.article-open article,body.article-open article p,body.article-open article li,body.article-open article blockquote{font-size:17px}.melanie-sprite{left:8px;bottom:66px;width:clamp(90px,21vw,122px)}}
 @media(max-width:420px){body.article-open article,body.article-open article p,body.article-open article li,body.article-open article blockquote{font-size:16px}.melanie-sprite{left:5px;bottom:62px;width:86px}}
+
+/* Corner mascot, bordered player handle, and playful pixel interruption. */
+.page-backdrop{display:none!important}
+.melanie-corner{position:absolute;z-index:4;right:max(20px,calc((100vw - 1320px)/2 + 4px));top:150px;width:clamp(90px,10vw,142px);display:grid;justify-items:center;pointer-events:none;filter:drop-shadow(4px 5px 0 color-mix(in srgb,var(--cat-crypto) 48%,transparent))}
+.melanie-corner span{font:12px var(--pixel);color:var(--accent);background:var(--paper);border:1px solid var(--accent);padding:4px 8px;box-shadow:3px 3px 0 color-mix(in srgb,var(--accent) 26%,transparent)}
+.melanie-corner img{width:100%;height:auto;image-rendering:pixelated}
+.music-dock .dock-strip{border:2px solid var(--accent)!important;border-bottom:2px solid var(--accent)!important;box-shadow:4px 4px 0 color-mix(in srgb,var(--cat-crypto) 35%,transparent)!important}
+.filters{align-items:center}.bullsheet-button{border-color:var(--cat-pwn);color:var(--cat-pwn);background:color-mix(in srgb,var(--cat-pwn) 10%,var(--paper));font-weight:700;box-shadow:3px 3px 0 color-mix(in srgb,var(--cat-pwn) 32%,transparent)}.bullsheet-button:hover{background:var(--cat-pwn);color:#fff;transform:translate(-1px,-1px)}
+.bullsheet-overlay{position:fixed;z-index:1000;inset:0;display:grid;place-items:center;overflow:hidden;background:#05070b;color:#eef8ff;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s,visibility .2s}
+.bullsheet-overlay.active{opacity:1;visibility:visible;pointer-events:auto}
+.bullsheet-rain{position:absolute;inset:-40%;opacity:.55;background-image:repeating-linear-gradient(105deg,transparent 0 28px,rgba(120,205,255,.7) 29px 31px,transparent 32px 73px);background-size:100% 100%;animation:pixel-rain .32s steps(3,end) infinite}
+.bullsheet-overlay:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 5px,rgba(110,200,255,.05) 6px 7px);pointer-events:none}
+.bullsheet-content{position:relative;z-index:2;display:grid;justify-items:center;gap:14px;text-align:center;padding:30px;animation:impact-in .55s steps(5,end) both}
+.bull-sprite{display:grid;place-items:center;width:min(48vw,290px);aspect-ratio:1;border:8px solid #d8d9ec;background:repeating-linear-gradient(0deg,#17192c 0 12px,#242641 12px 24px);box-shadow:12px 12px 0 #51468c;color:#ffe078;font:900 clamp(30px,7vw,72px) var(--pixel);text-shadow:5px 5px #8b274c;image-rendering:pixelated}
+.bull-title{margin:0;color:#fff;font:900 clamp(24px,5vw,52px) var(--pixel);text-shadow:4px 4px #9b305e}.bullsheet-content p{font:14px var(--pixel);letter-spacing:.14em;color:#98d9ee}.bullsheet-content button{border:3px solid #8ae9bc;background:#8ae9bc;color:#07141e;padding:13px 22px;font:700 15px var(--pixel);box-shadow:5px 5px 0 #347c74}.bullsheet-content button:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 #347c74}
+.bullsheet-overlay[data-mode=world-cut] .bullsheet-impact{position:absolute;left:-8%;right:-8%;top:50%;height:9px;background:#fff;box-shadow:0 0 10px 5px #fff,0 0 40px 18px #fd4e72,0 32px 0 15px #030307;transform:scaleX(0);transform-origin:left;animation:world-cut .7s steps(6,end) .12s forwards}
+.bullsheet-overlay[data-mode=world-cut] .bullsheet-content{animation:split-shake .8s steps(5,end) both}
+.bullsheet-overlay[data-mode=world-cut] .bull-sprite{border-color:#ff748f;color:#fff;background:linear-gradient(155deg,#28101c 0 46%,#fa456c 47% 49%,#06050a 50%);text-shadow:4px 4px #ff315f}
+.bullsheet-overlay[data-mode=time-stop] .bullsheet-rain{animation-duration:.11s;opacity:.85}.bullsheet-overlay[data-mode=time-stop] .bullsheet-content{animation:time-impact .5s steps(4,end) both}
+@keyframes pixel-rain{from{transform:translateY(-25px)}to{transform:translateY(25px)}}@keyframes impact-in{0%{transform:scale(.05) rotate(-8deg);filter:brightness(5)}70%{transform:scale(1.08) rotate(2deg)}100%{transform:scale(1) rotate(0);filter:none}}@keyframes time-impact{0%{transform:scale(2);opacity:0;filter:contrast(5)}65%{transform:scale(.94);opacity:1}100%{transform:scale(1)}}@keyframes world-cut{to{transform:scaleX(1)}}@keyframes split-shake{0%,45%{transform:translateX(0)}55%{transform:translateX(-18px)}65%{transform:translateX(17px)}75%{transform:translateX(-10px)}100%{transform:translateX(0)}}
+@media(max-width:700px){.melanie-corner{top:120px;right:12px;width:76px}.melanie-corner span{font-size:9px}.filters{gap:6px}.bullsheet-button{font-size:11px;padding:7px 9px}}
+@media(prefers-reduced-motion:reduce){.bullsheet-rain,.bullsheet-content,.bullsheet-impact{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+.melanie-corner{top:154px;right:max(22px,calc((100vw - 1320px)/2 - 125px));width:74px}
+@media(max-width:700px){.melanie-corner{top:151px;right:12px;width:58px}}
+/* Put the small animated sprite in the header corner, above its divider. */
+.melanie-sprite{display:none!important}
+.melanie-corner{top:7px;right:18px;width:58px;z-index:5}
+.top{padding-right:96px}
+body.article-open .melanie-corner{display:none}
+@media(max-width:700px){.melanie-corner{top:7px;right:12px;width:50px}.top{padding-right:78px}}
+@media(max-width:420px){.melanie-corner{width:42px;right:10px}.top{padding-right:66px}}

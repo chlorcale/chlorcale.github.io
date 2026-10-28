@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap&subset=vietnamese">
-<link rel="stylesheet" href="style.css?v=20261028-13">
+<link rel="stylesheet" href="style.css?v=20261028-14">
 </head>
 <body>
 <header class="top">
@@ -24,6 +24,7 @@
     <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Đổi giao diện" aria-pressed="false">◐</button>
   </nav>
 </header>
+<div class="melanie-corner" aria-hidden="true"><span>Melanie</span><img src="assets/melanie-hcmut.webp" alt=""></div>
 <div id="chloe-backdrop" class="page-backdrop" aria-hidden="true">
   <span class="backdrop-label">CHLOR / PIXEL ARCHIVE</span>
   <div class="backdrop-terminal" aria-hidden="true"><span>BKISC // SECURE ARCHIVE</span><b>ACCESS GRANTED</b><code>01000010 01001011<br>CTF 2026 · PIXEL SYSTEM</code><i>▰ ▱ ▰ ▰ ▱ ▰ ▱ ▰</i></div>
@@ -46,8 +47,14 @@
   <button class="dock-strip" id="music-panel-toggle" type="button" aria-expanded="false" aria-controls="music-dock-panel"><span class="dock-led"></span><span>NOW PLAYING</span><strong id="dock-title">Thiệp Hồng Sai Tên</strong><span class="dock-note">♫</span></button>
   <audio id="site-track" preload="none"></audio>
 </aside>
-<script src="app.js?v=20261028-13"></script>
+<div id="bullsheet-overlay" class="bullsheet-overlay" aria-hidden="true">
+  <div class="bullsheet-rain" aria-hidden="true"></div>
+  <div class="bullsheet-impact" aria-hidden="true"></div>
+  <div class="bullsheet-content"><div class="bull-sprite" aria-hidden="true">WRYYYY!</div><h2 class="bull-title">THE WORLD</h2><p>PIXEL REALITY CORRUPTED</p><button id="bullsheet-reset" type="button">RESET PAGE</button></div>
+</div>
+<script src="app.js?v=20261028-14"></script>
 </body>
 </html>
+
 
 
