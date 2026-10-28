@@ -5,7 +5,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
 const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
-const ASSET_VERSION = '20261028-7';
+const ASSET_VERSION = '20261028-8';
 let markedPromise;
 let resumeMusicOnReturn = false;
 let currentTrack = 0;
@@ -93,7 +93,7 @@ function route() {
   document.body.classList.toggle('article-open', view === 'w');
   document.body.classList.toggle('show-backdrop', view !== 'w');
   document.querySelectorAll('nav a[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === (view === 'about' ? 'about' : 'home')));
-  window.scrollTo(0, 0); document.title = 'chlorcale · writeups';
+  window.scrollTo(0, 0); document.title = 'BKISC-Recruitment-CTF 2026 · chlorcale/writeups';
   if (view === 'w') return renderPost(decodeURIComponent(arg || ''));
   if (view === 'about') return renderAbout();
   renderHome();
@@ -103,7 +103,7 @@ function renderHome() {
   const cats = categories();
   const counts = Object.fromEntries(cats.map(c => [c, DB.filter(w => w.category === c).length]));
   const done = DB.filter(w => w.done).length;
-  app.innerHTML = `<section class="hero"><div class="hero-copy"><h1>chlorcale<span>/writeups</span></h1><p class="lede">Sổ tay những bài CTF đã giải — ghi lại cách nghĩ, công cụ và đường đi đến flag.</p></div>
+  app.innerHTML = `<section class="hero"><div class="hero-copy"><p class="event-stamp">BKISC-Recruitment-CTF 2026</p><h1>chlorcale<span>/writeups</span></h1><p class="lede">Sổ tay bài giải CTF — ghi lại cách nghĩ, công cụ và đường đi đến flag.</p></div>
     <div class="overview"><div class="distribution" aria-label="Phân bố bài theo mảng">${cats.map(c => `<button class="dist-segment ${state.cat===c?'selected':''}" data-cat="${esc(c)}" style="--cat:${COLORS[c]||COLORS.misc};--share:${counts[c]/DB.length}" title="${esc(catName(c))}: ${counts[c]} bài" aria-label="Lọc ${esc(catName(c))}, ${counts[c]} bài"></button>`).join('')}</div>
     <div class="dist-labels">${cats.map(c => `<button class="dist-label" data-cat="${esc(c)}"><i style="--cat:${COLORS[c]||COLORS.misc}"></i>${esc(catName(c))} <span>${counts[c]}</span></button>`).join('')}</div>
     <p class="stats"><strong>${DB.length}</strong> bài đã giải <span>·</span> <strong>${done}</strong> bài có writeup</p></div></section>
@@ -154,7 +154,7 @@ function basicMarkdown(md){
 }
 async function renderPost(slug){
   const idx=DB.findIndex(x=>x.slug===slug),w=DB[idx];if(!w){app.innerHTML='<p>Không tìm thấy bài. <a href="#/">Về danh sách</a></p>';return;}
-  document.title=`${w.title} · chlorcale/writeups`;const color=COLORS[w.category]||COLORS.misc;
+  document.title=`${w.title} · BKISC-Recruitment-CTF 2026`;const color=COLORS[w.category]||COLORS.misc;
   let md='';if(w.done){try{const r=await fetchFresh(`writeups/${encodeURIComponent(w.slug)}.md`);if(!r.ok)throw new Error('HTTP');md=await r.text();}catch(_){app.innerHTML=`<div class="post-layout"><div class="post-main"><a class="back" href="#/">← Tất cả bài</a><h1>${esc(w.title)}</h1><p class="muted">Không tải được nội dung writeup. Kết nối có thể đang chậm hoặc bị gián đoạn.</p><button type="button" onclick="location.reload()">Thử lại</button></div></div>`;return;}}
   await Promise.race([ensureMarked().then(() => true).catch(() => false), new Promise(resolve => setTimeout(() => resolve(false), 1200))]);
   const {data,body}=parseFront(md);
