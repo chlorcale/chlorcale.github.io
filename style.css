@@ -224,7 +224,7 @@ img.world-pixel{width:min(88vw,130vh);height:auto;max-height:none;object-fit:con
 .world-entrance b{display:none}
 @keyframes world-charge{0%{opacity:0;transform:translate(50%,-50%) scale(.01)}8%{opacity:1}58%{opacity:1;transform:translate(50%,-50%) scale(.74)}100%{opacity:.97;transform:translate(50%,-50%) scale(1.36)}}
 /* Use the user's crack cutout as a translucent, pixel stepped glass overlay. */
-.bull-crack{background-image:url("assets/crack-overlay.png");background-size:100% 100%;background-position:center;background-repeat:no-repeat;image-rendering:pixelated;opacity:0;mix-blend-mode:screen}
+.bull-crack{background-image:url("assets/crack-overlay.png?v=20261028-24");background-size:100% 100%;background-position:center;background-repeat:no-repeat;image-rendering:pixelated;opacity:0;mix-blend-mode:screen}
 .bullsheet-overlay.impact .bull-crack{opacity:.9;animation:crack-bloom .3s steps(3,end) both}
 @media(max-width:700px){.ambient-rain{opacity:.16}.world-entrance{top:50%}img.world-pixel{width:min(98vw,130vh)}}
 #dio-sfx{display:none}
@@ -232,7 +232,10 @@ img.world-pixel{width:min(88vw,130vh);height:auto;max-height:none;object-fit:con
 /* DIO keeps a locked size and position while descending; no bounce or sway. */
 .dio-entrance{left:50%;top:50%;animation:dio-drop-point 1.65s steps(12,end) .08s both}
 @keyframes dio-drop-point{0%{opacity:0;transform:translate(-50%,-170vh)}18%{opacity:1;transform:translate(-50%,-140vh)}100%{opacity:1;transform:translate(-50%,-50%)}}
-/* Keep DIO and his pose fully still until a button press; replay only on activation. */
-.dio-entrance{top:50%;left:50%;opacity:0;transform:translate(-50%,-170vh);animation:none}
-.bullsheet-overlay.active .dio-entrance{animation:dio-drop-point 1.65s steps(12,end) .08s both}
-@keyframes dio-drop-point{0%{opacity:0;transform:translate(-50%,-170vh)}18%{opacity:1;transform:translate(-50%,-140vh)}100%{opacity:1;transform:translate(-50%,-50%)}}
+/* DIO appears in place; only opacity changes, with no entrance movement. */
+.dio-entrance{top:50%;left:50%;opacity:0;transform:translate(-50%,-50%);animation:none}
+.bullsheet-overlay.active .dio-entrance{animation:dio-materialize .5s steps(5,end) .08s both}
+@keyframes dio-materialize{0%{opacity:0}40%{opacity:.2}72%{opacity:.65}100%{opacity:1}}
+.dio-caption{position:absolute;z-index:5;top:calc(50% + min(35vh, 360px));left:50%;transform:translateX(-50%);opacity:0;color:#f6d85f;font:clamp(18px,3vw,34px) var(--pixel);letter-spacing:.08em;text-shadow:3px 3px #b7344b;white-space:nowrap}
+.bullsheet-overlay.active .dio-caption{animation:caption-materialize .32s steps(3,end) .25s both}
+@keyframes caption-materialize{from{opacity:0}to{opacity:1}}
