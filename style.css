@@ -1,4 +1,4 @@
-:root{color-scheme:light;--bg:#EEF2F6;--paper:#FBFCFD;--ink:#101B33;--muted:#53647b;--line:#CFD8E3;--accent:#2B50AA;--mark:#FFE27A;--markink:#241d04;--code:#111827;--cat-crypto:#6C4DDB;--cat-forensics:#0F8B8D;--cat-pwn:#D64545;--cat-reverse:#E08A1E;--cat-web:#2B7DE9;--cat-misc:#6B7A90;--heading:"Barlow Condensed", "Arial Narrow", "Segoe UI", sans-serif;--serif:"Newsreader", Georgia, "Times New Roman", serif;--mono:"JetBrains Mono", "Cascadia Code", Consolas, monospace;--shadow:0 4px 14px rgba(24,42,71,.06)}
+﻿:root{color-scheme:light;--bg:#EEF2F6;--paper:#FBFCFD;--ink:#101B33;--muted:#53647b;--line:#CFD8E3;--accent:#2B50AA;--mark:#FFE27A;--markink:#241d04;--code:#111827;--cat-crypto:#6C4DDB;--cat-forensics:#0F8B8D;--cat-pwn:#D64545;--cat-reverse:#E08A1E;--cat-web:#2B7DE9;--cat-misc:#6B7A90;--heading:"Barlow Condensed", "Arial Narrow", "Segoe UI", sans-serif;--serif:"Newsreader", Georgia, "Times New Roman", serif;--mono:"JetBrains Mono", "Cascadia Code", Consolas, monospace;--shadow:0 4px 14px rgba(24,42,71,.06)}
 :root[data-theme=dark]{color-scheme:dark;--bg:#0E1522;--paper:#141D2E;--ink:#DDE5F1;--muted:#A0AEC2;--line:#26334A;--accent:#86AAFF;--mark:#E9C94B;--markink:#1c1808;--code:#080D15;--cat-crypto:#9B84FF;--cat-forensics:#42C4C1;--cat-pwn:#FF7777;--cat-reverse:#FFB64E;--cat-web:#73B1FF;--cat-misc:#A6B4C9;--shadow:0 6px 20px rgba(0,0,0,.2)}
 *{box-sizing:border-box}html{scroll-padding-top:2rem;scroll-behavior:smooth}body{margin:0;background-color:var(--bg);color:var(--ink);font:16px/1.55 "Inter",Arial,sans-serif;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-attachment:fixed}body:before{content:"";position:fixed;inset:0;background:var(--bg);opacity:.91;pointer-events:none;z-index:-1}a{color:var(--accent)}button,input{font:inherit;color:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:3px}::selection{background:var(--mark);color:#101B33}
 .top{max-width:1180px;margin:auto;padding:20px 32px 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{font:700 20px var(--mono);color:var(--ink);text-decoration:none;letter-spacing:-1.4px}.brand span,.hero h1 span{color:var(--muted);font-weight:400}.top nav{display:flex;align-items:center;gap:24px}.top nav a{font:500 13px var(--mono);text-decoration:none;color:var(--muted);padding:7px 0;border-bottom:2px solid transparent}.top nav a.on,.top nav a:hover{color:var(--ink);border-color:var(--accent)}.theme-toggle{border:1px solid var(--line);background:var(--paper);border-radius:4px;padding:6px 10px;font:12px var(--mono)}
@@ -49,3 +49,39 @@ article{font:16px/1.85 var(--pixel)}article code,article pre code{font-family:va
 @media(max-width:420px){.music-dock{right:9px;width:calc(100vw - 18px)}.music-dock .dock-panel{padding:8px}}
 
 @media(hover:hover){.music-dock:not(:hover):not(:focus-within):not(.is-open) .dock-panel{visibility:visible;opacity:0;pointer-events:none}}
+
+/* Legibility and decorative balance pass */
+body{font-size:18px;line-height:1.65;background-image:linear-gradient(color-mix(in srgb,var(--line) 35%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--line) 35%,transparent) 1px,transparent 1px),radial-gradient(ellipse at 78% 42%,color-mix(in srgb,var(--cat-crypto) 11%,transparent),transparent 34%),radial-gradient(ellipse at 10% 78%,color-mix(in srgb,var(--accent) 8%,transparent),transparent 30%);background-size:24px 24px,24px 24px,auto,auto}
+body:before{opacity:.74}
+.top,main,footer{max-width:1320px}
+.top{padding-top:24px;padding-bottom:18px}.brand{font-size:24px}.top nav a{font-size:15px}main{padding-top:44px;padding-bottom:88px}
+.hero{gap:64px;padding:42px 0 38px}.hero h1{font-size:clamp(38px,4.6vw,60px)}.lede{font-size:18px;line-height:1.8}.dist-label{font-size:14px}.stats{font-size:15px}
+.search-wrap{max-width:520px;padding:3px 13px}.search-wrap input{font-size:15px;padding:12px 0}.filter{font-size:14px;padding:8px 12px}.group h2{font-size:15px}.grid{gap:18px}.card-title{font-size:18px;line-height:1.45}.card-meta,.status{font-size:13px}.card-info{padding:16px}
+article{font-size:19px;line-height:1.9}.post-head h1{font-size:clamp(38px,5vw,62px)}article h2{font-size:24px}article h3{font-size:19px}article pre{font-size:15px}.post-nav{font-size:14px}
+/* Melanie aligns with the content column and stays clear of the music dock. */
+.melanie-sprite{left:max(12px,calc((100vw - 1320px)/2 - 178px));bottom:clamp(64px,10vh,100px);width:clamp(150px,14vw,218px)}
+.melanie-sprite .sprite-name{font-size:13px;padding:5px 8px;background:var(--paper);border:1px solid var(--accent);display:table;margin:0 0 6px 10px;box-shadow:3px 3px 0 color-mix(in srgb,var(--accent) 24%,transparent)}
+.melanie-art{max-height:42vh;object-fit:contain;object-position:bottom;filter:drop-shadow(5px 5px 0 color-mix(in srgb,var(--cat-crypto) 50%,transparent))}
+/* Persistent readable player handle; only the playlist rises and sinks. */
+.music-dock{right:22px;width:min(370px,calc(100vw - 24px));transform:none!important;bottom:0;gap:0}
+.music-dock .dock-strip{height:54px;background:var(--paper);border:2px solid var(--accent);border-bottom:0;box-shadow:5px 0 0 color-mix(in srgb,var(--accent) 24%,transparent);font-size:12px}
+.music-dock .dock-panel{order:0;transform:translateY(0);transition:transform .38s cubic-bezier(.2,.8,.2,1),opacity .2s ease;visibility:visible;opacity:0;pointer-events:none}
+.music-dock .dock-strip{order:1}
+.music-dock:hover .dock-panel,.music-dock:focus-within .dock-panel,.music-dock.is-open .dock-panel{opacity:1;pointer-events:auto}
+.music-dock:not(:hover):not(:focus-within):not(.is-open) .dock-panel{transform:translateY(14px)}
+.dock-strip strong{font-size:14px}.dock-strip>span:nth-child(2){font-size:11px}
+.backdrop-terminal{position:absolute;right:5vw;top:34%;width:min(440px,35vw);padding:18px 22px;border:2px solid color-mix(in srgb,var(--cat-web) 45%,var(--line));background:color-mix(in srgb,var(--paper) 78%,transparent);box-shadow:8px 8px 0 color-mix(in srgb,var(--cat-crypto) 24%,transparent);display:grid;gap:14px;color:var(--muted);font:13px var(--pixel);transform:rotate(-2deg)}
+.backdrop-terminal span{color:var(--cat-web);letter-spacing:.12em}.backdrop-terminal b{font-size:clamp(16px,2vw,24px);color:var(--accent);text-shadow:3px 3px 0 color-mix(in srgb,var(--accent) 22%,transparent)}.backdrop-terminal code{font:13px/1.8 var(--pixel);color:var(--ink)}.backdrop-terminal i{font-style:normal;letter-spacing:.2em;color:var(--cat-crypto)}
+@media(max-width:700px){body{font-size:17px}.top nav a{font-size:13px}main{padding-top:30px}.hero{gap:26px}.lede{font-size:16px}.card-title{font-size:17px}.melanie-sprite{left:8px;bottom:62px;width:clamp(100px,24vw,140px)}.backdrop-terminal{right:5vw;top:38%;width:48vw;padding:10px;font-size:9px}.backdrop-terminal code{font-size:10px}.music-dock{right:12px;width:min(340px,calc(100vw - 24px))}.music-dock .dock-strip{height:50px}}
+@media(max-width:420px){body{font-size:16px}.hero h1{font-size:34px}.filter{font-size:12px;padding:7px 9px}.card-title{font-size:16px}.melanie-sprite{width:92px;left:5px;bottom:58px}.backdrop-terminal{width:52vw;top:43%;opacity:.82}.dock-strip strong{font-size:12px}}
+
+/* Keep the music dock handle fixed; animate only the hidden-height playlist. */
+.music-dock{display:flex;flex-direction:column;justify-content:flex-end;transform:none!important;overflow:visible!important}
+.music-dock .dock-panel{order:0;max-height:min(54vh,330px);margin-bottom:0;transform:translateY(0);transition:opacity .24s ease,transform .38s cubic-bezier(.2,.8,.2,1),visibility .38s;visibility:hidden;opacity:0;pointer-events:none}
+.music-dock .dock-strip{order:1;position:relative;z-index:1;display:flex;visibility:visible;opacity:1;transform:none;height:54px;min-height:54px}
+.music-dock:hover .dock-panel,.music-dock:focus-within .dock-panel,.music-dock.is-open .dock-panel{visibility:visible;opacity:1;pointer-events:auto}
+.music-dock:not(:hover):not(:focus-within):not(.is-open) .dock-panel{transform:translateY(16px)}
+@media(hover:none){.music-dock:not(.is-open) .dock-panel{visibility:hidden;opacity:0}.music-dock .dock-strip{visibility:visible;opacity:1}}
+@media(max-width:700px){.melanie-sprite{left:10px;bottom:62px;width:clamp(106px,24vw,148px)}.music-dock .dock-strip{height:50px;min-height:50px}}
+@media(max-width:420px){.melanie-sprite{left:6px;bottom:58px;width:96px}}
+
