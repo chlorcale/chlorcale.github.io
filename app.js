@@ -5,7 +5,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
 const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
-const ASSET_VERSION = '20261028-17';
+const ASSET_VERSION = '20261028-19';
 let markedPromise;
 let currentTrack = 0;
 const PLAYLIST = [
@@ -47,6 +47,9 @@ function initBullSheet() {
   const overlay = document.getElementById('bullsheet-overlay');
   if (!reset || !overlay) return;
   const audio = document.getElementById('site-track');
+  const dioSprite = overlay.querySelector('.dio-pixel'), worldSprite = overlay.querySelector('.world-pixel');
+  const dioSrc = dioSprite.src, worldSrc = worldSprite.src;
+  let musicWasPlaying = false, effectTimer, impactTimer;
   function playStopSfx() {
     try {
       const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -71,10 +74,11 @@ function initBullSheet() {
   }
   document.addEventListener('click', e => {
     if (!e.target.closest?.('#bullsheet-button')) return;
-    const mode = Math.random() < .72 ? 'dio-world' : 'world-cut';
-    overlay.dataset.mode = mode;
-    overlay.querySelector('.bull-title').textContent = mode === 'dio-world' ? 'TIME HAS STOPPED' : 'REALITY, SPLIT IN TWO';
-    overlay.querySelector('.bullsheet-content p').textContent = mode === 'dio-world' ? 'THE WORLD — ORA ORA ORA!' : 'WORLD CUT — DIMENSION SEVERED';
+    if (overlay.classList.contains('active')) return;
+    clearTimeout(effectTimer); clearTimeout(impactTimer);
+    dioSprite.removeAttribute('src'); worldSprite.removeAttribute('src');
+    requestAnimationFrame(() => { dioSprite.src = dioSrc; worldSprite.src = worldSrc; });
+    musicWasPlaying = !audio.paused;
     if (!audio.paused) audio.pause();
     playStopSfx();
     overlay.classList.remove('active', 'impact');
@@ -82,10 +86,20 @@ function initBullSheet() {
     overlay.classList.add('active');
     overlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('bullsheet-active');
-    window.setTimeout(() => overlay.classList.add('impact'), 2300);
+    impactTimer = window.setTimeout(() => overlay.classList.add('impact'), 2500);
+    effectTimer = window.setTimeout(() => resetScene(), 8500);
   });
-  reset.addEventListener('click', () => location.reload());
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('active')) reset.click(); });
+  function resetScene() {
+    clearTimeout(effectTimer);
+    clearTimeout(impactTimer);
+    overlay.classList.remove('active', 'impact');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('bullsheet-active');
+    if (musicWasPlaying) audio.play().catch(() => {});
+    musicWasPlaying = false;
+  }
+  reset.addEventListener('click', resetScene);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('active')) resetScene(); });
 }
 function initMusic() {
   const audio = document.getElementById('site-track'), play = document.getElementById('music-toggle'), mute = document.getElementById('music-mute');
@@ -162,7 +176,7 @@ function renderHome() {
   const cats = categories();
   const counts = Object.fromEntries(cats.map(c => [c, DB.filter(w => w.category === c).length]));
   const done = DB.filter(w => w.done).length;
-  app.innerHTML = `<section class="hero"><div class="melanie-corner" aria-hidden="true"><span>Melanie</span><img src="assets/melanie-hcmut.webp" alt=""></div><div class="hero-copy"><p class="event-stamp">BKISC-Recruitment-CTF 2026</p><h1>chlorcale<span>/writeups</span></h1><p class="lede">Sổ tay bài giải CTF — ghi lại cách nghĩ, công cụ và đường đi đến flag.</p></div>
+  app.innerHTML = `<section class="hero"><div class="melanie-corner" aria-hidden="true"><img src="assets/melanie-hcmut.webp" alt=""></div><div class="hero-copy"><p class="event-stamp">BKISC-Recruitment-CTF 2026</p><h1>chlorcale<span>/writeups</span></h1><p class="lede">Sổ tay bài giải CTF — ghi lại cách nghĩ, công cụ và đường đi đến flag.</p></div>
     <div class="overview"><div class="distribution" aria-label="Phân bố bài theo mảng">${cats.map(c => `<button class="dist-segment ${state.cat===c?'selected':''}" data-cat="${esc(c)}" style="--cat:${COLORS[c]||COLORS.misc};--share:${counts[c]/DB.length}" title="${esc(catName(c))}: ${counts[c]} bài" aria-label="Lọc ${esc(catName(c))}, ${counts[c]} bài"></button>`).join('')}</div>
     <div class="dist-labels">${cats.map(c => `<button class="dist-label" data-cat="${esc(c)}"><i style="--cat:${COLORS[c]||COLORS.misc}"></i>${esc(catName(c))} <span>${counts[c]}</span></button>`).join('')}</div>
     <p class="stats"><strong>${DB.length}</strong> bài đã giải <span>·</span> <strong>${done}</strong> bài có writeup</p></div></section>
@@ -234,5 +248,4 @@ async function renderPost(slug){
 function postNav(idx){return `<nav class="post-nav" aria-label="Điều hướng bài">${idx>0?`<a href="#/w/${encodeURIComponent(DB[idx-1].slug)}">← ${esc(DB[idx-1].title)}</a>`:'<span></span>'}${idx<DB.length-1?`<a class="next" href="#/w/${encodeURIComponent(DB[idx+1].slug)}">${esc(DB[idx+1].title)} →</a>`:''}</nav>`;}
 function renderAbout(){app.innerHTML='<section class="about"><h1>Giới thiệu</h1><p>Sổ tay writeup CTF của <a href="https://github.com/chlorcale">chlorcale</a>. Mỗi bài lưu lại đề bài, kỹ thuật sử dụng và cách giải theo từng bước.</p></section>';}
 addEventListener('hashchange',route);load();
-
 

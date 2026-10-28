@@ -179,3 +179,38 @@ img.dio-pixel{display:block;width:auto;height:min(70vh,760px);max-width:56vw;asp
 img.world-pixel{display:block;width:min(72vw,980px);height:auto;max-height:56vh;object-fit:contain;background:none;clip-path:none;filter:drop-shadow(8px 7px 0 #322642);image-rendering:pixelated}
 .world-entrance{right:4%;top:48%}.dio-entrance{gap:7px}.dio-entrance b{font-size:18px}
 @media(max-width:700px){img.dio-pixel{height:min(62vh,600px);max-width:68vw}img.world-pixel{width:94vw}}
+
+/* Use the supplied animated rain and keep the scene layered over the site. */
+.ambient-rain{z-index:1;opacity:.24;background-image:url("assets/rain.gif");background-position:center top;background-size:330px 462px;background-repeat:repeat;mix-blend-mode:screen;mask-image:linear-gradient(90deg,transparent,#000 12% 88%,transparent)}
+@media(max-width:700px){.ambient-rain{opacity:.17;background-size:250px 350px}}
+.melanie-corner{top:-52px;right:3%;width:clamp(165px,12vw,205px)}
+.melanie-corner span{display:none!important}
+@media(max-width:700px){.melanie-corner{top:-28px;right:1%;width:clamp(120px,30vw,168px)}}
+/* Transparent overlays preserve the page text; only sprites and glass cracks cover it. */
+.bullsheet-overlay{position:fixed;inset:0;z-index:25;display:block;background:transparent;opacity:1;visibility:hidden;pointer-events:none;transition:none;isolation:isolate;overflow:hidden}
+.bullsheet-overlay.active{visibility:visible;pointer-events:none;animation:none}
+.bullsheet-stage{z-index:2;pointer-events:none}
+.bullsheet-rain{inset:0;background-image:url("assets/rain.gif");background-size:cover;background-position:center;mix-blend-mode:screen;opacity:0;animation:none}
+.bullsheet-flash{z-index:8;background:#d9e1e9;opacity:0}
+.bullsheet-overlay.active .bullsheet-flash{animation:stop-flash .42s steps(1,end) .92s}
+.dio-entrance{left:50%;top:0;transform:translate(-50%,-120vh);animation:dio-drop-point 1.7s steps(7,end) .08s both}
+img.dio-pixel{height:min(65vh,720px);max-width:55vw;filter:drop-shadow(8px 8px 0 #4b3623);}
+.world-entrance{right:50%;top:52%;opacity:0;transform:translate(50%,-50%) scale(.12);animation:world-charge 1.6s steps(8,end) 1.55s both}
+img.world-pixel{width:clamp(500px,56vw,1000px);max-height:none;filter:drop-shadow(8px 8px 0 #392d47);}
+.bull-crack{z-index:7;inset:-2%;opacity:0;clip-path:none;background:url("assets/dio_and_theworld/pixel-crack.svg") center/100% 100% no-repeat;mix-blend-mode:screen;filter:drop-shadow(0 0 5px #d7f2ff);}
+.bullsheet-overlay.impact .bull-crack{opacity:.92;animation:crack-bloom .35s steps(4,end) both}
+.bull-fist{display:none!important}
+.bullsheet-content{display:none!important}
+.bullsheet-reset{position:absolute;z-index:12;left:18px;bottom:18px;pointer-events:auto;padding:7px 10px;border:1px solid #8edff0;background:#07141edb;color:#d8f7eb;font:11px var(--pixel);opacity:0;transition:opacity .2s}
+.bullsheet-overlay.active .bullsheet-reset{opacity:.88}
+.bullsheet-reset:hover{opacity:1;background:#0d2938}
+.bullsheet-active>#app,.bullsheet-active>.top,.bullsheet-active>.site-footer,.bullsheet-active>.music-dock,.bullsheet-active>.melanie-sprite,.bullsheet-active>.ambient-rain{filter:grayscale(1) contrast(1.12)}
+@keyframes dio-drop-point{0%{opacity:0;transform:translate(-50%,-120vh) scale(.66)}55%{opacity:1;transform:translate(-50%,-44vh) scale(1.04)}68%{transform:translate(-50%,-50vh) scale(.97)}82%,100%{opacity:1;transform:translate(-50%,-50vh) scale(1)}}
+@keyframes world-charge{0%{opacity:0;transform:translate(50%,-50%) scale(.12)}12%{opacity:1}65%{opacity:1;transform:translate(50%,-50%) scale(1.35)}84%{transform:translate(50%,-50%) scale(2.15)}100%{opacity:.94;transform:translate(50%,-50%) scale(2.15)}}
+@media(max-width:700px){img.dio-pixel{height:min(56vh,560px);max-width:72vw}img.world-pixel{width:94vw}.melanie-corner{top:-18px}}
+/* Final timing: DIO drops in, points, then The World charges into the glass. */
+.dio-entrance{top:50%;animation:dio-drop-point 1.65s steps(7,end) .08s both}
+@keyframes dio-drop-point{0%{opacity:0;transform:translate(-50%,-170vh) scale(.64)}54%{opacity:1;transform:translate(-50%,-43%) scale(1.04)}66%{transform:translate(-50%,-54%) scale(.98)}82%,100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.bullsheet-active #app{animation:site-stop-glitch .34s steps(2,end) 4}
+@keyframes site-stop-glitch{0%,100%{filter:grayscale(1) contrast(1.12)}35%{filter:grayscale(1) contrast(1.5) translateX(3px)}70%{filter:grayscale(1) contrast(.8) translateX(-2px)}}
+@media(prefers-reduced-motion:reduce){.bullsheet-active #app{animation:none}}
