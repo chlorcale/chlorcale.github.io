@@ -5,7 +5,14 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
 const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
+const ASSET_VERSION = '20261028-2';
 let markedPromise;
+async function fetchFresh(url) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try { return await fetch(`${url}${url.includes('?') ? '&' : '?'}v=${ASSET_VERSION}`, { cache: 'no-store', signal: controller.signal }); }
+  finally { clearTimeout(timer); }
+}
 function ensureMarked() {
   if (window.marked) return Promise.resolve();
   if (!markedPromise) markedPromise = new Promise((resolve, reject) => {
@@ -32,8 +39,8 @@ function initTheme() {
 }
 async function load() {
   initTheme();
-  try { const r = await fetch('writeups/index.json'); if (!r.ok) throw new Error('index'); DB = await r.json(); route(); }
-  catch (_) { app.innerHTML = '<p class="muted">Chưa có <code>writeups/index.json</code>. Chạy <code>python ctf.py build</code> rồi tải lại trang.</p>'; }
+  try { const r = await fetchFresh('writeups/index.json'); if (!r.ok) throw new Error('index'); DB = await r.json(); route(); }
+  catch (_) { app.innerHTML = '<p class="muted">Không tải được danh sách bài. Kiểm tra kết nối rồi <button type="button" onclick="location.reload()">thử tải lại</button>.</p>'; }
 }
 function route() {
   const [view, arg] = location.hash.replace(/^#\/?/, '').split('/');
@@ -100,10 +107,10 @@ function basicMarkdown(md){
 async function renderPost(slug){
   const idx=DB.findIndex(x=>x.slug===slug),w=DB[idx];if(!w){app.innerHTML='<p>Không tìm thấy bài. <a href="#/">Về danh sách</a></p>';return;}
   document.title=`${w.title} · chlorcale/writeups`;const color=COLORS[w.category]||COLORS.misc;
-  let md='';if(w.done){try{const r=await fetch(`writeups/${encodeURIComponent(w.slug)}.md`);if(!r.ok)throw new Error();md=await r.text();}catch(_){md='';}}
+  let md='';if(w.done){try{const r=await fetchFresh(`writeups/${encodeURIComponent(w.slug)}.md`);if(!r.ok)throw new Error('HTTP');md=await r.text();}catch(_){app.innerHTML=`<div class="post-layout"><div class="post-main"><a class="back" href="#/">← Tất cả bài</a><h1>${esc(w.title)}</h1><p class="muted">Không tải được nội dung writeup. Kết nối có thể đang chậm hoặc bị gián đoạn.</p><button type="button" onclick="location.reload()">Thử lại</button></div></div>`;return;}}
   await Promise.race([ensureMarked().then(() => true).catch(() => false), new Promise(resolve => setTimeout(() => resolve(false), 1200))]);
   const {data,body}=parseFront(md);
-  if(!w.done||!md){app.innerHTML=`<div class="post-layout"><div class="post-main"><a class="back" href="#/">← Tất cả bài</a><header class="post-head"><div class="post-cat" style="--cat:${color}"><i></i>${esc(catName(w.category))}</div><h1>${esc(w.title)}</h1></header><div class="todo-panel"><div class="todo-cover">${cover(w.slug,w.category,false)}</div><h2>Writeup chưa có</h2><p>Tạo tệp <code>writeups/${esc(w.slug)}.md</code>, viết nội dung theo cấu trúc bài CTF rồi sinh lại chỉ mục.</p><pre><code>python ctf.py build</code></pre></div>${postNav(idx)}</div></div>`;return;}
+  if(!w.done){app.innerHTML=`<div class="post-layout"><div class="post-main"><a class="back" href="#/">← Tất cả bài</a><header class="post-head"><div class="post-cat" style="--cat:${color}"><i></i>${esc(catName(w.category))}</div><h1>${esc(w.title)}</h1></header><div class="todo-panel"><div class="todo-cover">${cover(w.slug,w.category,false)}</div><h2>Writeup chưa có</h2><p>Tạo tệp <code>writeups/${esc(w.slug)}.md</code>, viết nội dung theo cấu trúc bài CTF rồi sinh lại chỉ mục.</p><pre><code>python ctf.py build</code></pre></div>${postNav(idx)}</div></div>`;return;}
   const techniques=(data.techniques||'').split(',').map(x=>x.trim()).filter(Boolean);
   app.innerHTML=`<div class="read-progress" id="progress"></div><div class="post-layout"><div class="post-main"><a class="back" href="#/">← Tất cả bài</a><header class="post-head"><div class="post-cat" style="--cat:${color}"><i></i>${esc(catName(w.category))}</div><h1>${esc(w.title)}</h1>${techniques.length?`<div class="techs">${techniques.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:''}</header><article id="article-body">${window.marked?marked.parse(body):basicMarkdown(body)}</article>${postNav(idx)}</div><aside class="toc" aria-label="Mục lục bài viết"><h2>Mục lục</h2><nav id="toc-links"></nav></aside></div>`;
   const article=document.getElementById('article-body');
