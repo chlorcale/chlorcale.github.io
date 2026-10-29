@@ -59,7 +59,7 @@ function initBullSheet() {
   const dioImgs = [...dioFrame.querySelectorAll('img')];
   const worldImgs = [...worldFrame.querySelectorAll('img')];
   const dioSrc = dioAnim.getAttribute('src');
-  const T = { dioHold: 1320, worldIn: 1760, worldFrame: 175, impact: 3300, end: 8200 };
+  const T = { worldIn: 1760, worldFrame: 175, impact: 3300, end: 8200 };
   let timers = [], runId = 0, running = false, musicWasPlaying = false, dioBlob = null, dioUrl = null;
   const later = (fn, ms) => timers.push(setTimeout(fn, ms));
   const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
@@ -110,7 +110,6 @@ function initBullSheet() {
     overlay.classList.remove('active', 'impact', 'world-arrived'); void overlay.offsetWidth;
     overlay.classList.add('active'); overlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('bullsheet-active');
-    later(() => dioFrame.classList.add('holding'), T.dioHold);
     later(() => {
       overlay.classList.add('world-arrived');
       [1, 2, 3].forEach((pose, i) => later(() => { worldFrame.dataset.pose = String(pose); }, T.worldFrame * (i + 1)));
