@@ -48,53 +48,89 @@ function initBullSheet() {
   if (!reset || !overlay) return;
   const audio = document.getElementById('site-track');
   const stopSfx = document.getElementById('dio-sfx');
-  const dioSprite = overlay.querySelector('.dio-pixel'), worldSprite = overlay.querySelector('.world-pixel');
-  const dioSrc = dioSprite.dataset.src;
-  let musicWasPlaying = false, effectTimer, impactTimer, spriteTimers = [];
-  const worldFrames = [0,1,2,3].map(i => `assets/dio_and_theworld/the-world-pose-${i}.png`);
-  const dioHold = 'assets/dio_and_theworld/dio-point-hold.png';
-  function playStopSfx() {
-    stopSfx.currentTime = 0;
-    stopSfx.play().catch(() => {});
+  const dioFrame = overlay.querySelector('.dio-frame');
+  const worldFrame = overlay.querySelector('.world-frame');
+  const dioAnim = dioFrame.querySelector('.dio-anim');
+  const dioImgs = [...dioFrame.querySelectorAll('img')];
+  const worldImgs = [...worldFrame.querySelectorAll('img')];
+  const dioSrc = dioAnim.getAttribute('src');
+  const T = { dioHold: 1320, worldIn: 1760, worldFrame: 175, impact: 3300, end: 8200 };
+  let timers = [], runId = 0, running = false, musicWasPlaying = false, dioBlob = null, dioUrl = null;
+  const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+  const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+  const num = (el, name) => Number(el.style.getPropertyValue(name)) || 0;
+
+  // Mỗi bộ frame dùng MỘT khung cố định = kích thước lớn nhất của các frame.
+  // Mọi frame giữ nguyên tỉ lệ pixel, đổi frame không làm layout nhúc nhích.
+  function measure(frame, imgs) {
+    const w = Math.max(...imgs.map(i => i.naturalWidth)), h = Math.max(...imgs.map(i => i.naturalHeight));
+    if (!w || !h) return;
+    frame.style.setProperty('--w', w); frame.style.setProperty('--h', h);
+    const sizes = [...new Set(imgs.map(i => `${i.naturalWidth}x${i.naturalHeight}`))];
+    if (sizes.length > 1) console.info('[bullsheet] các frame khác kích thước:', sizes.join(', '), '→ nên xuất cùng kích thước canvas');
   }
-  document.addEventListener('click', e => {
-    if (!e.target.closest?.('#bullsheet-button')) return;
-    if (overlay.classList.contains('active')) return;
-    clearTimeout(effectTimer); clearTimeout(impactTimer); spriteTimers.forEach(clearTimeout); spriteTimers = [];
-    dioSprite.src = dioSrc; worldSprite.src = worldFrames[0];
-    musicWasPlaying = !audio.paused;
-    if (!audio.paused) audio.pause();
-    playStopSfx();
-    overlay.classList.remove('active', 'impact', 'world-arrived');
-    void overlay.offsetWidth;
-    overlay.classList.add('active');
-    overlay.setAttribute('aria-hidden', 'false');
+  function fit() {
+    const small = innerWidth <= 700;
+    const dw = num(dioFrame, '--w'), dh = num(dioFrame, '--h'), ww = num(worldFrame, '--w');
+    if (dw && dh) dioFrame.style.setProperty('--k', Math.min(Math.min(innerHeight * (small ? .56 : .65), small ? 560 : 720) / dh, innerWidth * (small ? .72 : .55) / dw));
+    if (ww) worldFrame.style.setProperty('--k', Math.min(innerWidth * (small ? .98 : .88), innerHeight * 1.3) / ww);
+  }
+
+  // Nạp + giải mã sẵn mọi ảnh ngay khi trang tải, để lúc bấm nút không còn chờ mạng/giải mã.
+  const ready = (async () => {
+    await Promise.all([...dioImgs, ...worldImgs].map(img => img.decode().catch(() => {})));
+    measure(dioFrame, dioImgs); measure(worldFrame, worldImgs); fit();
+    try { const r = await fetch(dioSrc); if (r.ok) dioBlob = await r.blob(); } catch (_) { /* dùng cách dự phòng bên dưới */ }
+  })();
+  addEventListener('resize', fit);
+
+  // Ảnh webp động chỉ chạy lại từ frame 0 khi nạp nguồn mới → dùng blob URL (không tải lại mạng).
+  async function restartDio() {
+    if (dioBlob) {
+      const old = dioUrl; dioUrl = URL.createObjectURL(dioBlob); dioAnim.src = dioUrl;
+      if (old) URL.revokeObjectURL(old);
+    } else dioAnim.src = `${dioSrc}${dioSrc.includes('?') ? '&' : '?'}play=${Date.now()}`;
+    try { await dioAnim.decode(); } catch (_) { /* vẫn chạy tiếp */ }
+  }
+
+  async function start() {
+    if (running) return;
+    running = true; const id = ++runId;
+    // Âm thanh phải bắt đầu ngay trong lượt bấm (chính sách autoplay của trình duyệt).
+    musicWasPlaying = !audio.paused; if (musicWasPlaying) audio.pause();
+    stopSfx.currentTime = 0; stopSfx.play().catch(() => {});
+    await ready; await restartDio();
+    if (id !== runId) return;                       // đã reset trong lúc chờ
+    clearTimers();
+    dioFrame.classList.remove('holding'); worldFrame.dataset.pose = '0';
+    overlay.classList.remove('active', 'impact', 'world-arrived'); void overlay.offsetWidth;
+    overlay.classList.add('active'); overlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('bullsheet-active');
-    spriteTimers.push(window.setTimeout(() => { dioSprite.src = dioHold; }, 1320));
-    spriteTimers.push(window.setTimeout(() => {
+    later(() => dioFrame.classList.add('holding'), T.dioHold);
+    later(() => {
       overlay.classList.add('world-arrived');
-      let i = 1;
-      const nextFrame = () => { if (i < worldFrames.length) { worldSprite.src = worldFrames[i++]; spriteTimers.push(window.setTimeout(nextFrame, 175)); } };
-      spriteTimers.push(window.setTimeout(nextFrame, 175));
-    }, 1760));
-    impactTimer = window.setTimeout(() => overlay.classList.add('impact'), 3300);
-    effectTimer = window.setTimeout(() => resetScene(), 8200);
-  });
+      [1, 2, 3].forEach((pose, i) => later(() => { worldFrame.dataset.pose = String(pose); }, T.worldFrame * (i + 1)));
+    }, T.worldIn);
+    later(() => overlay.classList.add('impact'), T.impact);
+    later(resetScene, T.end);
+  }
+
   function resetScene() {
-    clearTimeout(effectTimer);
-    clearTimeout(impactTimer); spriteTimers.forEach(clearTimeout); spriteTimers = [];
-    overlay.classList.remove('active', 'impact');
-    overlay.classList.remove('world-arrived');
+    runId++; clearTimers();
+    overlay.classList.remove('active', 'impact', 'world-arrived');
     overlay.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('bullsheet-active');
-    dioSprite.removeAttribute('src'); worldSprite.removeAttribute('src');
+    dioFrame.classList.remove('holding'); worldFrame.dataset.pose = '0';   // KHÔNG gỡ src nữa
     stopSfx.pause(); stopSfx.currentTime = 0;
     if (musicWasPlaying) audio.play().catch(() => {});
-    musicWasPlaying = false;
+    musicWasPlaying = false; running = false;
   }
+
+  document.addEventListener('click', e => { if (e.target.closest?.('#bullsheet-button')) start(); });
   reset.addEventListener('click', resetScene);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('active')) resetScene(); });
 }
+
 function initMusic() {
   const audio = document.getElementById('site-track'), play = document.getElementById('music-toggle'), mute = document.getElementById('music-mute');
   const title = document.getElementById('music-title'), dockTitle = document.getElementById('dock-title'), artist = document.getElementById('music-artist'), tracks = [...document.querySelectorAll('.track')];

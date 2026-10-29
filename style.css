@@ -239,3 +239,26 @@ img.world-pixel{width:min(88vw,130vh);height:auto;max-height:none;object-fit:con
 .dio-caption{position:absolute;z-index:5;top:calc(50% + min(35vh, 360px));left:50%;transform:translateX(-50%);opacity:0;color:#f6d85f;font:clamp(18px,3vw,34px) var(--pixel);letter-spacing:.08em;text-shadow:3px 3px #b7344b;white-space:nowrap}
 .bullsheet-overlay.active .dio-caption{animation:caption-materialize .32s steps(3,end) .25s both}
 @keyframes caption-materialize{from{opacity:0}to{opacity:1}}
+
+/* ===== Thêm vào CUỐI style.css ===== */
+
+/* BullSheet: mỗi bộ frame nằm trong MỘT khung cố định, các frame xếp chồng và chỉ đổi độ trong suốt.
+   Không đổi src, không đổi kích thước ⇒ không còn nhúng lên xuống. */
+.sprite-frame{position:relative;flex:none;width:calc(var(--w,320)*1px);height:calc(var(--h,320)*1px);transform:scale(var(--k,.4));transform-origin:center;pointer-events:none;filter:drop-shadow(8px 8px 0 #392d47)}
+.sprite-frame img{position:absolute;left:50%;display:block;width:auto;height:auto;max-width:none;max-height:none;margin:0;background:none;clip-path:none;filter:none;image-rendering:pixelated;opacity:0}
+.sprite-frame[data-anchor=bottom] img{bottom:0;transform:translateX(-50%)}
+.sprite-frame[data-anchor=center] img{top:50%;transform:translate(-50%,-50%)}
+.dio-frame{filter:drop-shadow(8px 8px 0 #4b3623)}
+.dio-frame .dio-anim{opacity:1}
+.dio-frame.holding .dio-anim{opacity:0}
+.dio-frame.holding .dio-hold{opacity:1}
+.world-frame[data-pose="0"] img:nth-child(1),
+.world-frame[data-pose="1"] img:nth-child(2),
+.world-frame[data-pose="2"] img:nth-child(3),
+.world-frame[data-pose="3"] img:nth-child(4){opacity:1}
+
+/* Mưa pixel (canvas do rain.js vẽ) thay cho rain.gif */
+canvas.ambient-rain{position:fixed;left:0;top:0;right:auto;bottom:auto;z-index:1;opacity:1;background:none;mask-image:none;mix-blend-mode:normal;animation:none;pointer-events:none;image-rendering:crisp-edges;image-rendering:pixelated}
+
+/* (Tuỳ chọn) Hiệu ứng "ngừng thời gian" chỉ đổi màu, không rung trang */
+@keyframes site-stop-glitch{0%,100%{filter:grayscale(1) contrast(1.12)}50%{filter:grayscale(1) contrast(1.4)}}
