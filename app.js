@@ -5,7 +5,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
 const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
-const ASSET_VERSION = '20261028-22';
+const ASSET_VERSION = '20261029-2';
 let markedPromise;
 let currentTrack = 0;
 const PLAYLIST = [
@@ -42,6 +42,10 @@ function initTheme() {
     applyTheme(next); try { localStorage.setItem('theme', next); } catch (_) { /* tiếp tục dùng giao diện trong phiên */ }
   });
 }
+
+/* ---------- Random BullSheet ----------
+   Mỗi bộ sprite nằm trong MỘT khung cố định, các frame xếp chồng và chỉ đổi độ trong suốt:
+   không đổi src, không đổi kích thước ⇒ không nhúng lên xuống. */
 function initBullSheet() {
   const reset = document.getElementById('bullsheet-reset');
   const overlay = document.getElementById('bullsheet-overlay');
@@ -50,6 +54,7 @@ function initBullSheet() {
   const stopSfx = document.getElementById('dio-sfx');
   const dioFrame = overlay.querySelector('.dio-frame');
   const worldFrame = overlay.querySelector('.world-frame');
+  if (!dioFrame || !worldFrame) { console.warn('[bullsheet] thiếu .dio-frame hoặc .world-frame trong index.html'); return; }
   const dioAnim = dioFrame.querySelector('.dio-anim');
   const dioImgs = [...dioFrame.querySelectorAll('img')];
   const worldImgs = [...worldFrame.querySelectorAll('img')];
@@ -60,8 +65,7 @@ function initBullSheet() {
   const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
   const num = (el, name) => Number(el.style.getPropertyValue(name)) || 0;
 
-  // Mỗi bộ frame dùng MỘT khung cố định = kích thước lớn nhất của các frame.
-  // Mọi frame giữ nguyên tỉ lệ pixel, đổi frame không làm layout nhúc nhích.
+  // Khung cố định = kích thước lớn nhất của các frame; mọi frame giữ nguyên tỉ lệ pixel.
   function measure(frame, imgs) {
     const w = Math.max(...imgs.map(i => i.naturalWidth)), h = Math.max(...imgs.map(i => i.naturalHeight));
     if (!w || !h) return;
@@ -76,7 +80,7 @@ function initBullSheet() {
     if (ww) worldFrame.style.setProperty('--k', Math.min(innerWidth * (small ? .98 : .88), innerHeight * 1.3) / ww);
   }
 
-  // Nạp + giải mã sẵn mọi ảnh ngay khi trang tải, để lúc bấm nút không còn chờ mạng/giải mã.
+  // Nạp + giải mã sẵn mọi ảnh ngay khi trang tải để lúc bấm nút không phải chờ.
   const ready = (async () => {
     await Promise.all([...dioImgs, ...worldImgs].map(img => img.decode().catch(() => {})));
     measure(dioFrame, dioImgs); measure(worldFrame, worldImgs); fit();
@@ -84,7 +88,7 @@ function initBullSheet() {
   })();
   addEventListener('resize', fit);
 
-  // Ảnh webp động chỉ chạy lại từ frame 0 khi nạp nguồn mới → dùng blob URL (không tải lại mạng).
+  // Webp động chỉ chạy lại từ frame 0 khi nạp nguồn mới → dùng blob URL (không tải lại mạng).
   async function restartDio() {
     if (dioBlob) {
       const old = dioUrl; dioUrl = URL.createObjectURL(dioBlob); dioAnim.src = dioUrl;
@@ -120,7 +124,7 @@ function initBullSheet() {
     overlay.classList.remove('active', 'impact', 'world-arrived');
     overlay.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('bullsheet-active');
-    dioFrame.classList.remove('holding'); worldFrame.dataset.pose = '0';   // KHÔNG gỡ src nữa
+    dioFrame.classList.remove('holding'); worldFrame.dataset.pose = '0';   // KHÔNG gỡ src
     stopSfx.pause(); stopSfx.currentTime = 0;
     if (musicWasPlaying) audio.play().catch(() => {});
     musicWasPlaying = false; running = false;
@@ -183,9 +187,10 @@ function initMusic() {
   });
 }
 async function load() {
-  initTheme();
-  initMusic();
-  initBullSheet();
+  // Mỗi phần khởi tạo chạy riêng: lỗi ở hiệu ứng/nhạc không được chặn việc tải danh sách bài.
+  for (const init of [initTheme, initMusic, initBullSheet]) {
+    try { init(); } catch (e) { console.error(`[${init.name}]`, e); }
+  }
   try { const r = await fetchFresh('writeups/index.json'); if (!r.ok) throw new Error('index'); DB = await r.json(); route(); }
   catch (_) { app.innerHTML = '<p class="muted">Không tải được danh sách bài. Kiểm tra kết nối rồi <button type="button" onclick="location.reload()">thử tải lại</button>.</p>'; }
 }
@@ -194,7 +199,7 @@ function route() {
   document.body.classList.toggle('article-open', view === 'w');
   document.body.classList.toggle('show-backdrop', view !== 'w');
   const melanie = document.querySelector('.melanie-art');
-  melanie.src = view === 'w' || matchMedia('(prefers-reduced-motion: reduce)').matches ? melanie.dataset.still : melanie.dataset.animation;
+  if (melanie) melanie.src = view === 'w' || matchMedia('(prefers-reduced-motion: reduce)').matches ? melanie.dataset.still : melanie.dataset.animation;
   document.querySelectorAll('nav a[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === (view === 'about' ? 'about' : 'home')));
   window.scrollTo(0, 0); document.title = 'BKISC-Recruitment-CTF 2026 · chlorcale/writeups';
   if (view === 'w') return renderPost(decodeURIComponent(arg || ''));
@@ -217,7 +222,7 @@ function renderHome() {
 }
 function card(w) {
   const color = COLORS[w.category] || COLORS.misc;
-  return `<a class="card ${w.done?'is-done':'is-todo'}" href="#/w/${encodeURIComponent(w.slug)}" style="--cat:${color}"><span class="cover">${cover(w.slug,w.category,w.done)}</span><span class="card-info"><span class="card-title">${esc(w.title)}</span><span class="card-meta"><i></i>${esc(catName(w.category))}</span><span class="status">${w.done?'<span class="check" aria-label="Writeup موجود">✓</span> Có writeup':'Chưa viết'}</span></span></a>`;
+  return `<a class="card ${w.done?'is-done':'is-todo'}" href="#/w/${encodeURIComponent(w.slug)}" style="--cat:${color}"><span class="cover">${cover(w.slug,w.category,w.done)}</span><span class="card-info"><span class="card-title">${esc(w.title)}</span><span class="card-meta"><i></i>${esc(catName(w.category))}</span><span class="status">${w.done?'<span class="check" aria-label="Có writeup">✓</span> Có writeup':'Chưa viết'}</span></span></a>`;
 }
 function drawList() {
   const cats = categories(), filters=document.getElementById('filters');
@@ -272,10 +277,9 @@ async function renderPost(slug){
   article.querySelectorAll('h3').forEach(h=>{const m=h.textContent.match(/^Bước\s+(\d+)/i);if(m)h.innerHTML=`<span class="step-badge">${m[1]}</span>${esc(h.textContent.replace(/^Bước\s+\d+\.?\s*/i,''))}`;});
   const headings=[...article.querySelectorAll('h2,h3')];const toc=document.getElementById('toc-links');toc.innerHTML=headings.map((h,i)=>{h.id=`section-${i}`;return `<a href="#${h.id}" class="${h.tagName==='H3'?'sub':''}">${esc(h.textContent)}</a>`;}).join('');
   if('IntersectionObserver'in window){const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){toc.querySelectorAll('a').forEach(a=>a.classList.toggle('current',a.hash===`#${e.target.id}`));}}),{rootMargin:'-20% 0px -70% 0px'});headings.forEach(h=>io.observe(h));}
-  addEventListener('scroll',()=>{const max=document.documentElement.scrollHeight-innerHeight;document.getElementById('progress').style.transform=`scaleX(${max>0?scrollY/max:0})`;},{passive:true});
+  addEventListener('scroll',()=>{const bar=document.getElementById('progress');if(!bar)return;const max=document.documentElement.scrollHeight-innerHeight;bar.style.transform=`scaleX(${max>0?scrollY/max:0})`;},{passive:true});
   article.querySelectorAll('.flag-copy').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(b.parentElement.querySelector('code').innerText);b.textContent='Đã chép';setTimeout(()=>b.textContent='Sao chép',1500);}catch(_){b.textContent='Không chép được';setTimeout(()=>b.textContent='Sao chép',1500);}}));
 }
 function postNav(idx){return `<nav class="post-nav" aria-label="Điều hướng bài">${idx>0?`<a href="#/w/${encodeURIComponent(DB[idx-1].slug)}">← ${esc(DB[idx-1].title)}</a>`:'<span></span>'}${idx<DB.length-1?`<a class="next" href="#/w/${encodeURIComponent(DB[idx+1].slug)}">${esc(DB[idx+1].title)} →</a>`:''}</nav>`;}
 function renderAbout(){app.innerHTML='<section class="about"><h1>Giới thiệu</h1><p>Sổ tay writeup CTF của <a href="https://github.com/chlorcale">chlorcale</a>. Mỗi bài lưu lại đề bài, kỹ thuật sử dụng và cách giải theo từng bước.</p></section>';}
 addEventListener('hashchange',route);load();
-

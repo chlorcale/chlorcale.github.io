@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap&subset=vietnamese">
-<link rel="stylesheet" href="style.css?v=20261028-24">
+<link rel="stylesheet" href="style.css?v=20261029-2">
 </head>
 <body>
 <header class="top">
@@ -24,7 +24,7 @@
     <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Đổi giao diện" aria-pressed="false">◐</button>
   </nav>
 </header>
-<div class="ambient-rain" aria-hidden="true"></div>
+<canvas id="rain" class="ambient-rain" aria-hidden="true"></canvas>
 <div id="chloe-backdrop" class="page-backdrop" aria-hidden="true">
   <span class="backdrop-label">CHLOR / PIXEL ARCHIVE</span>
   <div class="backdrop-terminal" aria-hidden="true"><span>BKISC // SECURE ARCHIVE</span><b>ACCESS GRANTED</b><code>01000010 01001011<br>CTF 2026 · PIXEL SYSTEM</code><i>▰ ▱ ▰ ▰ ▱ ▰ ▱ ▰</i></div>
@@ -49,26 +49,24 @@
   <audio id="dio-sfx" preload="auto" src="assets/Za%20Warudo%20Time%20stop%20sound%20effect%20%2B%20DIO%20HTFT%20voice%20line.mp3"></audio>
 </aside>
 <div id="bullsheet-overlay" class="bullsheet-overlay" aria-hidden="true">
-  <canvas id="rain" class="ambient-rain" aria-hidden="true"></canvas>
   <div class="bullsheet-flash" aria-hidden="true"></div>
   <div class="bullsheet-stage" aria-hidden="true">
     <div class="dio-entrance"><div class="sprite-frame dio-frame" data-anchor="bottom">
-    <img class="dio-anim" src="assets/dio_and_theworld/dio-point.webp" alt="">
-    <img class="dio-hold" src="assets/dio_and_theworld/dio-point-hold.png" alt="">
-  </div></div>
-  <div class="dio-caption" aria-hidden="true">ZA WARUDO!</div>
-  <div class="world-entrance"><div class="sprite-frame world-frame" data-anchor="center">
-    <img src="assets/dio_and_theworld/the-world-pose-0.png" alt="">
-    <img src="assets/dio_and_theworld/the-world-pose-1.png" alt="">
-    <img src="assets/dio_and_theworld/the-world-pose-2.png" alt="">
-    <img src="assets/dio_and_theworld/the-world-pose-3.png" alt="">
-  </div></div>
-    <div class="bull-crack"></div><div class="bull-fist"></div>
+      <img class="dio-anim" src="assets/dio_and_theworld/dio-point.webp" alt="">
+      <img class="dio-hold" src="assets/dio_and_theworld/dio-point-hold.png" alt="">
+    </div></div>
+    <div class="dio-caption" aria-hidden="true">ZA WARUDO!</div>
+    <div class="world-entrance"><div class="sprite-frame world-frame" data-anchor="center" data-pose="0">
+      <img src="assets/dio_and_theworld/the-world-pose-0.png" alt="">
+      <img src="assets/dio_and_theworld/the-world-pose-1.png" alt="">
+      <img src="assets/dio_and_theworld/the-world-pose-2.png" alt="">
+      <img src="assets/dio_and_theworld/the-world-pose-3.png" alt="">
+    </div></div>
+    <div class="bull-crack"></div>
   </div>
   <button id="bullsheet-reset" class="bullsheet-reset" type="button">RESET EFFECT · ESC</button>
 </div>
-<script src="app.js?v=20261028-23"></script>
-<script src="rain.js?v=20261029-1"></script>
+<script src="app.js?v=20261029-2"></script>
+<script src="rain.js?v=20261029-2"></script>
 </body>
 </html>
-

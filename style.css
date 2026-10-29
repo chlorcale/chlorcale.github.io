@@ -151,38 +151,15 @@ body.article-open .melanie-corner{display:none}
 .bullsheet-stage{position:absolute;inset:0;z-index:3;overflow:hidden;perspective:900px}
 .dio-entrance,.world-entrance{position:absolute;display:grid;justify-items:center;gap:10px;opacity:0;color:#f6d85f;font:14px var(--pixel);text-shadow:3px 3px #603c78}
 .dio-entrance{left:50%;top:50%;transform:translate(-50%,-50%) scale(.35);animation:dio-point 1.45s steps(6,end) .18s both}
-.dio-pixel{width:clamp(110px,16vw,190px);height:clamp(150px,22vw,250px);display:grid;place-items:center;background:linear-gradient(135deg,transparent 0 19%,#281d3d 20% 27%,transparent 28%),linear-gradient(45deg,transparent 0 15%,#d1a833 16% 55%,#f5d56a 56% 70%,transparent 71%);clip-path:polygon(38% 0,67% 0,68% 14%,85% 12%,88% 26%,100% 29%,94% 40%,78% 38%,73% 53%,94% 60%,100% 67%,72% 65%,68% 100%,27% 100%,34% 62%,18% 48%,10% 32%,24% 28%,31% 12%);filter:drop-shadow(9px 8px 0 #422e68)}
-.dio-pixel svg{width:100%;height:100%;image-rendering:pixelated;filter:drop-shadow(0 0 8px #ffdf6d)}
-.dio-entrance span{font-size:clamp(18px,3vw,34px);letter-spacing:.08em;color:#fff;text-shadow:3px 3px #b7344b}
 .world-entrance{right:12%;top:48%;transform:translate(120vw,-50%) rotateY(-25deg);color:#e5d4ff;animation:world-fly .72s steps(5,end) 1.55s forwards}
-.world-pixel{position:relative;width:clamp(145px,20vw,250px);height:clamp(170px,24vw,290px);background:linear-gradient(90deg,transparent 0 18%,#7865ad 19% 33%,#b0a0d3 34% 67%,#6b5a9a 68% 82%,transparent 83%),linear-gradient(#4b3d74 0 20%,transparent 20%);clip-path:polygon(28% 0,72% 0,78% 13%,95% 15%,100% 31%,86% 42%,80% 52%,100% 62%,94% 74%,76% 65%,72% 100%,30% 100%,28% 66%,10% 76%,0 65%,20% 48%,14% 34%,5% 18%,25% 14%);filter:drop-shadow(10px 8px 0 #29233e)}
-.world-pixel i{position:absolute;right:-8%;top:42%;width:50%;height:23%;background:#b5a8d4;border:8px solid #665687;box-shadow:10px 10px 0 #342c4b;transform:rotate(-12deg);image-rendering:pixelated}
-.world-entrance b{white-space:nowrap;letter-spacing:.12em}
-.bull-fist{position:absolute;z-index:6;right:-30%;top:44%;width:clamp(160px,28vw,360px);height:clamp(120px,20vw,240px);opacity:0;background:linear-gradient(#eee8ff 0 20%,#a89cc8 20% 74%,#6c608b 75%);clip-path:polygon(100% 15%,42% 15%,42% 0,30% 0,30% 18%,20% 18%,20% 5%,9% 5%,9% 25%,0 25%,0 72%,12% 72%,12% 90%,26% 90%,26% 100%,55% 100%,55% 84%,100% 84%);filter:drop-shadow(0 0 16px #f3e5ff)}
-.bullsheet-overlay.active .bull-fist{animation:ora-punch .7s steps(5,end) 2.15s both}
 .bull-crack{position:absolute;z-index:5;inset:0;opacity:0;background:linear-gradient(104deg,transparent 49.75%,#fff 49.85% 50.15%,transparent 50.25%),linear-gradient(82deg,transparent 41%,#d7e9ff 41.1% 41.25%,transparent 41.35%),linear-gradient(118deg,transparent 60%,#d7e9ff 60.1% 60.25%,transparent 60.35%);clip-path:polygon(49% 0,51% 0,50% 27%,57% 37%,51% 50%,59% 61%,50% 100%,48% 100%,52% 63%,45% 50%,50% 35%)}
 .bullsheet-overlay.impact .bull-crack{opacity:1;animation:crack-bloom .45s steps(4,end) both}
-.bullsheet-overlay[data-mode=world-cut] .bull-crack{clip-path:polygon(0 49%,38% 50%,49% 38%,61% 50%,100% 48%,100% 52%,63% 54%,50% 63%,36% 53%,0 52%)}
-.bullsheet-content{position:absolute;z-index:9;left:50%;bottom:6vh;transform:translateX(-50%);width:min(92vw,680px);padding:18px 22px;border:3px solid #9cecff;background:#07111fea;box-shadow:7px 7px 0 #564888;opacity:0;animation:panel-appear .35s steps(4,end) 2.9s forwards}
-.bullsheet-overlay.active .bullsheet-content{animation:panel-appear .35s steps(4,end) 2.9s forwards}
-.bull-title{font-size:clamp(22px,4.2vw,48px);letter-spacing:.03em}.bullsheet-content p{margin:0;font-size:clamp(11px,1.5vw,16px)}
-.bullsheet-content button{margin-top:5px}
-.bullsheet-overlay[data-mode=world-cut] .dio-entrance{display:none}.bullsheet-overlay[data-mode=world-cut] .world-entrance{animation-delay:.18s}.bullsheet-overlay[data-mode=world-cut] .bull-fist{display:none}.bullsheet-overlay[data-mode=world-cut] .bull-crack{animation:crack-bloom .55s steps(5,end) .65s both;opacity:1}
-@keyframes ambient-rainfall{to{background-position:0 230px,0 310px}}@keyframes screen-flicker{0%,100%{filter:brightness(1)}25%{filter:brightness(2.5)}50%{filter:brightness(.5)}75%{filter:brightness(1.7)}}@keyframes scan-jump{50%{transform:translateY(5px) skewX(4deg)}}@keyframes stop-flash{0%,24%,40%{opacity:.96}12%,32%,100%{opacity:0}}@keyframes dio-point{0%{opacity:0;transform:translate(-50%,-50%) scale(.25)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}30%,78%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-90%,-50%) scale(.85)}}@keyframes world-fly{0%{opacity:0;transform:translate(120vw,-50%) rotateY(-25deg)}20%{opacity:1}78%{opacity:1;transform:translate(-5vw,-50%) rotateY(0)}100%{opacity:0;transform:translate(-12vw,-50%) scale(1.08)}}@keyframes ora-punch{0%{opacity:0;right:-35%;transform:scale(.55) rotate(-12deg)}35%{opacity:1}65%{opacity:1;right:23%;transform:scale(1.2) rotate(8deg)}100%{opacity:0;right:48%;transform:scale(1.4) rotate(-7deg)}}@keyframes crack-bloom{0%{filter:brightness(4);transform:scale(.2)}100%{filter:brightness(1);transform:scale(1)}}@keyframes panel-appear{to{opacity:1}}
-.bullsheet-active>#app,.bullsheet-active>.top,.bullsheet-active>.site-footer,.bullsheet-active>.music-dock,.bullsheet-active>.melanie-sprite,.bullsheet-active>.ambient-rain{filter:grayscale(1) contrast(1.18)}
-@media(max-width:700px){.dio-pixel{width:125px;height:175px}.world-pixel{width:160px;height:190px}.bull-fist{top:43%}.bullsheet-content{bottom:4vh;padding:14px}}
-@media(prefers-reduced-motion:reduce){.ambient-rain{animation:none}.bullsheet-overlay.active,.bullsheet-overlay:before,.dio-entrance,.world-entrance,.bull-fist,.bull-crack,.bullsheet-flash{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+@keyframes screen-flicker{0%,100%{filter:brightness(1)}25%{filter:brightness(2.5)}50%{filter:brightness(.5)}75%{filter:brightness(1.7)}}@keyframes scan-jump{50%{transform:translateY(5px) skewX(4deg)}}@keyframes stop-flash{0%,24%,40%{opacity:.96}12%,32%,100%{opacity:0}}@keyframes crack-bloom{0%{filter:brightness(4);transform:scale(.2)}100%{filter:brightness(1);transform:scale(1)}}@keyframes panel-appear{to{opacity:1}}
+.bullsheet-reset{position:absolute;z-index:12;left:18px;bottom:18px;pointer-events:auto;padding:7px 10px;border:1px solid #8edff0;background:#07141edb;color:#d8f7eb;font:11px var(--pixel);opacity:0;transition:opacity .2s}
+.bullsheet-overlay.active .bullsheet-reset{opacity:.88}
+.bullsheet-reset:hover{opacity:1;background:#0d2938}
 .hero{position:relative}.melanie-corner{top:6px;right:4%;width:clamp(125px,10vw,158px)}@media(max-width:700px){.melanie-corner{top:2px;right:2%;width:clamp(82px,20vw,120px)}}
 .melanie-corner{width:clamp(108px,8vw,128px)}@media(max-width:700px){.melanie-corner{width:clamp(82px,20vw,120px)}}
-/* Render the supplied transparent animation sheets at pixel scale. */
-img.dio-pixel{display:block;width:auto;height:min(70vh,760px);max-width:56vw;aspect-ratio:auto;background:none;clip-path:none;filter:drop-shadow(7px 6px 0 #3c2a56);image-rendering:pixelated}
-img.world-pixel{display:block;width:min(72vw,980px);height:auto;max-height:56vh;object-fit:contain;background:none;clip-path:none;filter:drop-shadow(8px 7px 0 #322642);image-rendering:pixelated}
-.world-entrance{right:4%;top:48%}.dio-entrance{gap:7px}.dio-entrance b{font-size:18px}
-@media(max-width:700px){img.dio-pixel{height:min(62vh,600px);max-width:68vw}img.world-pixel{width:94vw}}
-
-/* Use the supplied animated rain and keep the scene layered over the site. */
-.ambient-rain{z-index:1;opacity:.24;background-image:url("assets/rain.gif");background-position:center top;background-size:330px 462px;background-repeat:repeat;mix-blend-mode:screen;mask-image:linear-gradient(90deg,transparent,#000 12% 88%,transparent)}
-@media(max-width:700px){.ambient-rain{opacity:.17;background-size:250px 350px}}
 .melanie-corner{top:-52px;right:3%;width:clamp(165px,12vw,205px)}
 .melanie-corner span{display:none!important}
 @media(max-width:700px){.melanie-corner{top:-28px;right:1%;width:clamp(120px,30vw,168px)}}
@@ -190,57 +167,25 @@ img.world-pixel{display:block;width:min(72vw,980px);height:auto;max-height:56vh;
 .bullsheet-overlay{position:fixed;inset:0;z-index:25;display:block;background:transparent;opacity:1;visibility:hidden;pointer-events:none;transition:none;isolation:isolate;overflow:hidden}
 .bullsheet-overlay.active{visibility:visible;pointer-events:none;animation:none}
 .bullsheet-stage{z-index:2;pointer-events:none}
-.bullsheet-rain{inset:0;background-image:url("assets/rain.gif");background-size:cover;background-position:center;mix-blend-mode:screen;opacity:0;animation:none}
 .bullsheet-flash{z-index:8;background:#d9e1e9;opacity:0}
 .bullsheet-overlay.active .bullsheet-flash{animation:stop-flash .42s steps(1,end) .92s}
-.dio-entrance{left:50%;top:0;transform:translate(-50%,-120vh);animation:dio-drop-point 1.7s steps(7,end) .08s both}
-img.dio-pixel{height:min(65vh,720px);max-width:55vw;filter:drop-shadow(8px 8px 0 #4b3623);}
-.world-entrance{right:50%;top:52%;opacity:0;transform:translate(50%,-50%) scale(.12);animation:world-charge 1.6s steps(8,end) 1.55s both}
-img.world-pixel{width:clamp(500px,56vw,1000px);max-height:none;filter:drop-shadow(8px 8px 0 #392d47);}
-.bull-crack{z-index:7;inset:-2%;opacity:0;clip-path:none;background:url("assets/dio_and_theworld/pixel-crack.svg") center/100% 100% no-repeat;mix-blend-mode:screen;filter:drop-shadow(0 0 5px #d7f2ff);}
-.bullsheet-overlay.impact .bull-crack{opacity:.92;animation:crack-bloom .35s steps(4,end) both}
-.bull-fist{display:none!important}
-.bullsheet-content{display:none!important}
-.bullsheet-reset{position:absolute;z-index:12;left:18px;bottom:18px;pointer-events:auto;padding:7px 10px;border:1px solid #8edff0;background:#07141edb;color:#d8f7eb;font:11px var(--pixel);opacity:0;transition:opacity .2s}
-.bullsheet-overlay.active .bullsheet-reset{opacity:.88}
-.bullsheet-reset:hover{opacity:1;background:#0d2938}
-.bullsheet-active>#app,.bullsheet-active>.top,.bullsheet-active>.site-footer,.bullsheet-active>.music-dock,.bullsheet-active>.melanie-sprite,.bullsheet-active>.ambient-rain{filter:grayscale(1) contrast(1.12)}
-@keyframes dio-drop-point{0%{opacity:0;transform:translate(-50%,-120vh) scale(.66)}55%{opacity:1;transform:translate(-50%,-44vh) scale(1.04)}68%{transform:translate(-50%,-50vh) scale(.97)}82%,100%{opacity:1;transform:translate(-50%,-50vh) scale(1)}}
-@keyframes world-charge{0%{opacity:0;transform:translate(50%,-50%) scale(.12)}12%{opacity:1}65%{opacity:1;transform:translate(50%,-50%) scale(1.35)}84%{transform:translate(50%,-50%) scale(2.15)}100%{opacity:.94;transform:translate(50%,-50%) scale(2.15)}}
-@media(max-width:700px){img.dio-pixel{height:min(56vh,560px);max-width:72vw}img.world-pixel{width:94vw}.melanie-corner{top:-18px}}
-/* Final timing: DIO drops in, points, then The World charges into the glass. */
-.dio-entrance{top:50%;animation:dio-drop-point 1.65s steps(7,end) .08s both}
-@keyframes dio-drop-point{0%{opacity:0;transform:translate(-50%,-170vh) scale(.64)}54%{opacity:1;transform:translate(-50%,-43%) scale(1.04)}66%{transform:translate(-50%,-54%) scale(.98)}82%,100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-.bullsheet-active #app{animation:site-stop-glitch .34s steps(2,end) 4}
-@keyframes site-stop-glitch{0%,100%{filter:grayscale(1) contrast(1.12)}35%{filter:grayscale(1) contrast(1.5) translateX(3px)}70%{filter:grayscale(1) contrast(.8) translateX(-2px)}}
-@media(prefers-reduced-motion:reduce){.bullsheet-active #app{animation:none}}
-
-/* Rain is one full-screen animation, rather than repeated vertical strips. */
-.ambient-rain{background-image:url("assets/rain.gif");background-size:cover;background-position:center;background-repeat:no-repeat;opacity:.22;mask-image:none;animation:none;mix-blend-mode:screen}
-/* The World starts at DIO's pointing position only after his pose settles. */
-.world-entrance{top:50%;right:50%;opacity:0;transform:translate(50%,-50%) scale(.01);transform-origin:center;animation:none}
-.bullsheet-overlay.world-arrived .world-entrance{animation:world-charge 1.55s steps(8,end) both}
-img.world-pixel{width:min(88vw,130vh);height:auto;max-height:none;object-fit:contain;}
-.world-entrance b{display:none}
-@keyframes world-charge{0%{opacity:0;transform:translate(50%,-50%) scale(.01)}8%{opacity:1}58%{opacity:1;transform:translate(50%,-50%) scale(.74)}100%{opacity:.97;transform:translate(50%,-50%) scale(1.36)}}
-/* Use the user's crack cutout as a translucent, pixel stepped glass overlay. */
-.bull-crack{background-image:url("assets/crack-overlay.png?v=20261028-24");background-size:100% 100%;background-position:center;background-repeat:no-repeat;image-rendering:pixelated;opacity:0;mix-blend-mode:screen}
-.bullsheet-overlay.impact .bull-crack{opacity:.9;animation:crack-bloom .3s steps(3,end) both}
-@media(max-width:700px){.ambient-rain{opacity:.16}.world-entrance{top:50%}img.world-pixel{width:min(98vw,130vh)}}
-#dio-sfx{display:none}
-@keyframes site-stop-glitch{0%,100%{filter:grayscale(1) contrast(1.12);transform:none}35%{filter:grayscale(1) contrast(1.5);transform:translateX(3px)}70%{filter:grayscale(1) contrast(.8);transform:translateX(-2px)}}
-/* DIO keeps a locked size and position while descending; no bounce or sway. */
-.dio-entrance{left:50%;top:50%;animation:dio-drop-point 1.65s steps(12,end) .08s both}
-@keyframes dio-drop-point{0%{opacity:0;transform:translate(-50%,-170vh)}18%{opacity:1;transform:translate(-50%,-140vh)}100%{opacity:1;transform:translate(-50%,-50%)}}
-/* DIO appears in place; only opacity changes, with no entrance movement. */
-.dio-entrance{top:50%;left:50%;opacity:0;transform:translate(-50%,-50%);animation:none}
+.dio-entrance{left:50%;top:50%;opacity:0;transform:translate(-50%,-50%);animation:none}
 .bullsheet-overlay.active .dio-entrance{animation:dio-materialize .5s steps(5,end) .08s both}
 @keyframes dio-materialize{0%{opacity:0}40%{opacity:.2}72%{opacity:.65}100%{opacity:1}}
+.world-entrance{top:50%;right:50%;opacity:0;transform:translate(50%,-50%) scale(.01);transform-origin:center;animation:none}
+.bullsheet-overlay.world-arrived .world-entrance{animation:world-charge 1.55s steps(8,end) both}
+@keyframes world-charge{0%{opacity:0;transform:translate(50%,-50%) scale(.01)}8%{opacity:1}58%{opacity:1;transform:translate(50%,-50%) scale(.74)}100%{opacity:.97;transform:translate(50%,-50%) scale(1.36)}}
+.bull-crack{z-index:7;inset:-2%;opacity:0;clip-path:none;background-image:url("assets/crack-overlay.png?v=20261028-24");background-size:100% 100%;background-position:center;background-repeat:no-repeat;image-rendering:pixelated;mix-blend-mode:screen}
+.bullsheet-overlay.impact .bull-crack{opacity:.9;animation:crack-bloom .3s steps(3,end) both}
 .dio-caption{position:absolute;z-index:5;top:calc(50% + min(35vh, 360px));left:50%;transform:translateX(-50%);opacity:0;color:#f6d85f;font:clamp(18px,3vw,34px) var(--pixel);letter-spacing:.08em;text-shadow:3px 3px #b7344b;white-space:nowrap}
 .bullsheet-overlay.active .dio-caption{animation:caption-materialize .32s steps(3,end) .25s both}
 @keyframes caption-materialize{from{opacity:0}to{opacity:1}}
+#dio-sfx{display:none}
+.bullsheet-active #app{animation:site-stop-glitch .34s steps(2,end) 4}
+.bullsheet-active>.top,.bullsheet-active>#app,.bullsheet-active>.site-footer,.bullsheet-active>.music-dock,.bullsheet-active>.ambient-rain{filter:grayscale(1) contrast(1.12)}
+@media(prefers-reduced-motion:reduce){.bullsheet-active #app{animation:none}.bullsheet-overlay.active,.bullsheet-overlay:before,.dio-entrance,.world-entrance,.bull-crack,.bullsheet-flash{animation-duration:.01ms!important;animation-iteration-count:1!important}}
 
-/* ===== Thêm vào CUỐI style.css ===== */
+/* ===================== BẢN VÁ MỚI ===================== */
 
 /* BullSheet: mỗi bộ frame nằm trong MỘT khung cố định, các frame xếp chồng và chỉ đổi độ trong suốt.
    Không đổi src, không đổi kích thước ⇒ không còn nhúng lên xuống. */
@@ -260,5 +205,5 @@ img.world-pixel{width:min(88vw,130vh);height:auto;max-height:none;object-fit:con
 /* Mưa pixel (canvas do rain.js vẽ) thay cho rain.gif */
 canvas.ambient-rain{position:fixed;left:0;top:0;right:auto;bottom:auto;z-index:1;opacity:1;background:none;mask-image:none;mix-blend-mode:normal;animation:none;pointer-events:none;image-rendering:crisp-edges;image-rendering:pixelated}
 
-/* (Tuỳ chọn) Hiệu ứng "ngừng thời gian" chỉ đổi màu, không rung trang */
+/* Hiệu ứng "ngừng thời gian" chỉ đổi màu, không rung trang */
 @keyframes site-stop-glitch{0%,100%{filter:grayscale(1) contrast(1.12)}50%{filter:grayscale(1) contrast(1.4)}}
