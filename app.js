@@ -5,7 +5,8 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
 const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
-const ASSET_VERSION = '20261030-7';
+let feedmeCleanup = null;
+const ASSET_VERSION = '20261030-17';
 let markedPromise;
 let currentTrack = 0;
 const PLAYLIST = [
@@ -356,6 +357,22 @@ function initMusic() {
     if (autoplay) { try { await audio.play(); } catch (_) { /* nút phát có thể thử lại */ } showPlayback(); }
   }
   audio.src = PLAYLIST[currentTrack].src; updateTrack();
+  // Try autoplay on page load. Browsers may block audible autoplay until a user gesture.
+  let waitingForGesture = true;
+  const startOnGesture = async event => {
+    if (!waitingForGesture || !audio.paused) return;
+    if (dock.contains(event.target)) return;
+    waitingForGesture = false;
+    ['pointerdown', 'keydown', 'touchstart'].forEach(eventName => document.removeEventListener(eventName, startOnGesture));
+    try { await audio.play(); } catch (_) { /* music button remains available if playback is still blocked */ }
+    showPlayback();
+  };
+  ['pointerdown', 'keydown', 'touchstart'].forEach(eventName => document.addEventListener(eventName, startOnGesture, { passive: true }));
+  audio.play().then(() => {
+    waitingForGesture = false;
+    ['pointerdown', 'keydown', 'touchstart'].forEach(eventName => document.removeEventListener(eventName, startOnGesture));
+    showPlayback();
+  }).catch(() => showPlayback());
   tracks.forEach((button, i) => button.addEventListener('click', () => selectTrack(i, true)));
   document.getElementById('music-prev').addEventListener('click', () => selectTrack(currentTrack - 1));
   document.getElementById('music-next').addEventListener('click', () => selectTrack(currentTrack + 1));
@@ -421,14 +438,51 @@ async function load() {
   catch (_) { app.innerHTML = '<p class="muted">Không tải được danh sách bài. Kiểm tra kết nối rồi <button type="button" onclick="location.reload()">thử tải lại</button>.</p>'; }
 }
 function route() {
+  if(feedmeCleanup){feedmeCleanup();feedmeCleanup=null;}
   const [view, arg] = location.hash.replace(/^#\/?/, '').split('/');
   document.body.classList.toggle('article-open', view === 'w');
   document.body.classList.toggle('show-backdrop', view !== 'w');
-  document.querySelectorAll('nav a[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === (view === 'about' ? 'about' : 'home')));
+  document.body.classList.toggle('feedme-open', view === 'feedme');
+  document.querySelectorAll('nav a[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === (['about','feedme'].includes(view) ? view : 'home')));
   window.scrollTo(0, 0); document.title = 'BKISC-Recruitment-CTF 2026 · chlorcale/writeups';
   if (view === 'w') { renderPost(decodeURIComponent(arg || '')); syncMelanieMotion(); return; }
   if (view === 'about') { renderAbout(); syncMelanieMotion(); return; }
+  if (view === 'feedme') { renderFeedme(); syncMelanieMotion(); return; }
   renderHome(); syncMelanieMotion();
+}
+function renderFeedme() {
+  app.innerHTML = `<section class="feedme-page" tabindex="0"><header class="feedme-heading"><p class="event-stamp">DỰ ÁN NUÔI TÔI</p><h1>Feed me<span>!</span></h1><p>Chọn một trong ba ô thức ăn rồi nhấn <kbd>Enter</kbd> để cho mèo ăn.</p></header><div class="feedme-world"><div class="feedme-crosshair" aria-hidden="true">+</div><div class="feed-cat-stage"><img id="feed-cat" class="feed-cat" src="assets/cat.png" alt="Mèo đen đang chờ được cho ăn"><canvas id="feed-video-canvas" class="feed-video-canvas" aria-hidden="true"></canvas></div><video id="feed-video" src="assets/cat-clapping.mp4" preload="metadata" playsinline></video><div class="feed-counter" aria-live="polite">Time feeded: <strong id="feed-count">0</strong><small>lượt trên trình duyệt này</small></div><p class="feed-message" id="feed-message">Mèo đang đợi đồ ăn...</p><span class="feed-pixel-decor decor-a" aria-hidden="true">✦</span><span class="feed-pixel-decor decor-b" aria-hidden="true">✚</span><div class="feed-hotbar" role="group" aria-label="Túi đồ gồm 9 ô">${Array.from({length:9},(_,i)=>`<button class="feed-slot${i===0?' selected':''}" type="button" data-slot="${i}" aria-label="Ô ${i+1}${i<3?', thức ăn'+(i+1):''}${i===0?', đang chọn':''}" ${i===0?'aria-pressed="true"':'aria-pressed="false"'}>${i<3?`<img src="assets/food${i+1}.png" alt=""><span class="feed-amount">∞</span>`:''}</button>`).join('')}</div></div><p class="feed-disclaimer">Bộ đếm chỉ lưu trên trình duyệt hiện tại. GitHub Pages không có máy chủ để cộng lượt cho mọi khách truy cập.</p></section>`;
+  initFeedme();
+}
+function initFeedme() {
+  const page=document.querySelector('.feedme-page'), stage=page.querySelector('.feed-cat-stage'), video=document.getElementById('feed-video'), canvas=document.getElementById('feed-video-canvas'), ctx=canvas.getContext('2d',{willReadFrequently:true}), counter=document.getElementById('feed-count'), message=document.getElementById('feed-message');
+  const slots=[...page.querySelectorAll('.feed-slot')]; let frame=0;
+  page.focus({preventScroll:true});
+  try { counter.textContent=localStorage.getItem('chlor-feed-count')||'0'; } catch (_) { counter.textContent='0'; }
+  const paint=()=>{
+    if(video.paused||video.ended||!video.videoWidth)return;
+    const width=320,height=Math.max(1,Math.round(320*video.videoHeight/video.videoWidth));
+    if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
+    ctx.drawImage(video,0,0,width,height);
+    const frameData=ctx.getImageData(0,0,width,height), pixels=frameData.data;
+    for(let i=0;i<pixels.length;i+=4){const r=pixels[i],g=pixels[i+1],b=pixels[i+2],green=g-Math.max(r,b);if(g>65&&green>18)pixels[i+3]=Math.max(0,Math.min(255,255-(green-18)*5));}
+    ctx.putImageData(frameData,0,0);
+    frame=requestAnimationFrame(paint);
+  };
+  const feed=async()=>{
+    let count=Number(counter.textContent)||0; count++;
+    counter.textContent=String(count); message.textContent='Yum! Mèo cảm ơn bạn ♥';
+    try{localStorage.setItem('chlor-feed-count',String(count));}catch(_){}
+    canvas.classList.add('playing');stage.classList.add('clapping');
+    try{video.currentTime=0; await video.play(); paint();}catch(_){canvas.classList.remove('playing');stage.classList.remove('clapping');message.textContent='Không phát được video. Thử nhấn cho ăn lại nhé.';}
+  };
+  slots.forEach(slot=>{
+    slot.addEventListener('click',()=>{slots.forEach(s=>{s.classList.remove('selected');s.setAttribute('aria-pressed','false');});slot.classList.add('selected');slot.setAttribute('aria-pressed','true');});
+  });
+  page.addEventListener('keydown',e=>{const selected=Number(page.querySelector('.feed-slot.selected')?.dataset.slot);if(e.key==='Enter'&&!e.repeat&&selected>=0&&selected<3){e.preventDefault();feed();}});
+  video.addEventListener('ended',()=>{cancelAnimationFrame(frame);canvas.classList.remove('playing');stage.classList.remove('clapping');message.textContent='Mèo đang đợi thêm đồ ăn...';});
+  video.addEventListener('error',()=>{canvas.classList.remove('playing');stage.classList.remove('clapping');message.textContent='Không tải được video mèo.';});
+  feedmeCleanup=()=>{cancelAnimationFrame(frame);video.pause();};
 }
 function categories() { return [...new Set(DB.map(w => w.category))].sort((a,b) => (Object.keys(CATS).indexOf(a) < 0 ? 99 : Object.keys(CATS).indexOf(a)) - (Object.keys(CATS).indexOf(b) < 0 ? 99 : Object.keys(CATS).indexOf(b))); }
 function renderHome() {
@@ -492,7 +546,8 @@ async function renderPost(slug){
   const {data,body}=parseFront(md);
   if(!w.done){app.innerHTML=`<div class="post-layout"><div class="post-main"><a class="back" href="#/">← Tất cả bài</a><header class="post-head"><div class="post-cat" style="--cat:${color}"><i></i>${esc(catName(w.category))}</div><h1>${esc(w.title)}</h1></header><div class="todo-panel"><div class="todo-cover">${cover(w.slug,w.category,false)}</div><h2>Writeup chưa có</h2><p>Tạo tệp <code>writeups/${esc(w.slug)}.md</code>, viết nội dung theo cấu trúc bài CTF rồi sinh lại chỉ mục.</p><pre><code>python ctf.py build</code></pre></div>${postNav(idx)}</div></div>`;return;}
   const techniques=(data.techniques||'').split(',').map(x=>x.trim()).filter(Boolean);
-  app.innerHTML=`<div class="read-progress" id="progress"></div><div class="post-layout"><div class="post-main"><a class="back" href="#/">← Tất cả bài</a><header class="post-head"><div class="post-cat" style="--cat:${color}"><i></i>${esc(catName(w.category))}</div><h1>${esc(w.title)}</h1>${techniques.length?`<div class="techs">${techniques.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:''}</header><article id="article-body">${window.marked?marked.parse(body):basicMarkdown(body)}</article>${postNav(idx)}</div><aside class="toc" aria-label="Mục lục bài viết"><h2>Mục lục</h2><nav id="toc-links"></nav></aside></div>`;
+  const summary=String(data.summary||w.summary||'').trim();
+  app.innerHTML=`<div class="read-progress" id="progress"></div><div class="post-layout"><div class="post-main"><a class="back" href="#/">← Tất cả bài</a><header class="post-head"><div class="post-cat" style="--cat:${color}"><i></i>${esc(catName(w.category))}</div><h1>${esc(w.title)}</h1>${techniques.length?`<div class="techs">${techniques.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:''}${summary?`<p class="post-summary">${esc(summary)}</p>`:''}</header><article id="article-body">${window.marked?marked.parse(body):basicMarkdown(body)}</article>${postNav(idx)}</div><aside class="toc" aria-label="Mục lục bài viết"><h2>Mục lục</h2><nav id="toc-links"></nav></aside></div>`;
   const article=document.getElementById('article-body');
   article.querySelectorAll('pre').forEach(pre=>{const code=pre.querySelector('code');if(!code)return;if(window.hljs)hljs.highlightElement(code);const lang=(code.className.match(/language-([\w-]+)/)||[])[1]||'text';pre.insertAdjacentHTML('beforebegin',`<div class="code-label"><span>${esc(lang)}</span><button class="copy" type="button">Sao chép</button></div>`);pre.classList.add('code-block');});
   article.querySelectorAll('.copy').forEach(b=>b.addEventListener('click',async()=>{const code=b.parentElement.nextElementSibling.querySelector('code');try{await navigator.clipboard.writeText(code.innerText);b.textContent='Đã chép';setTimeout(()=>b.textContent='Sao chép',1500);}catch(_){b.textContent='Không chép được';setTimeout(()=>b.textContent='Sao chép',1500);}}));

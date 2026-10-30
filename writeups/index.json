@@ -6,12 +6,15 @@
     "done": true,
     "techniques": [
       "lcg-state-recovery",
+      "difference-of-squares",
+      "algebraic-elimination",
+      "modular-sqrt",
       "sign-ambiguity",
       "modular-inverse",
-      "aes-ecb",
-      "sha256-key-derivation"
+      "sha256-key-derivation",
+      "aes-ecb"
     ],
-    "summary": "Khôi phục seed của LCG từ leak s² + c, rồi dùng seed làm khoá AES."
+    "summary": "Từ 5 leak s² + c, khử c bằng hiệu hai leak, giải phương trình bậc hai tìm a, suy ra b, c và state đầu, lùi LCG về seed rồi dùng seed làm khoá AES."
   },
   {
     "slug": "nta-1-intro-to-network-traffic-analysis",
@@ -81,9 +84,15 @@
     "slug": "take-me-to-church",
     "title": "Take me to Church",
     "category": "reverse",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "church-numerals",
+      "lambda-calculus",
+      "xor",
+      "modular-arithmetic",
+      "source-code-analysis"
+    ],
+    "summary": "Rút gọn các Church numeral thành số nguyên, xác định hằng số 36 và modulo 256, rồi đảo phép XOR để khôi phục flag."
   },
   {
     "slug": "slow-flag",
@@ -97,25 +106,41 @@
     "slug": "please-do-reverse",
     "title": "Please do Reverse",
     "category": "reverse",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "source-code-analysis",
+      "hardcoded-credentials",
+      "repeating-key-xor"
+    ],
+    "summary": "Đọc source để lấy username và password được hardcode, sau đó chạy lại phép XOR với khóa lặp để khôi phục flag."
   },
   {
     "slug": "embedding",
     "title": "Embedding",
     "category": "crypto",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "polynomial-evaluation",
+      "complex-to-real-linear-system",
+      "bounded-integer-recovery",
+      "mixed-integer-linear-programming"
+    ],
+    "summary": "Khôi phục 42 byte của flag từ 16 mẫu phức bằng cách biến phép encode thành hệ tuyến tính và tận dụng việc hệ số là byte nguyên."
   },
   {
     "slug": "carry-me",
     "title": "Carry Me",
     "category": "crypto",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "popcount-carry-identity",
+      "run-length-leak",
+      "attempt-count-leak",
+      "known-bit-padding",
+      "adaptive-queries",
+      "retry-on-bad-budget"
+    ],
+    "summary": "Oracle popcount(M + secret) thực chất tiết lộ số lần nhớ khi cộng. Chọn M phù hợp để mỗi truy vấn đọc được độ dài một dãy bit của secret, đồng thời khai thác số lượt được cấp để suy ra các bit biên."
   },
   {
     "slug": "admin-portal",
@@ -129,9 +154,15 @@
     "slug": "two-bit-oracle",
     "title": "Two-bit oracle",
     "category": "crypto",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "rsa-malleability",
+      "chosen-ciphertext-attack",
+      "lsb-parity-oracle",
+      "case-analysis-mod-4",
+      "binary-search"
+    ],
+    "summary": "Oracle chỉ trả về XOR của hai bit thấp nhất. Vì N ≡ 1 (mod 4), nhân ciphertext với 2^e biến nó thành oracle parity, rồi binary search trên m/N để khôi phục toàn bộ plaintext."
   },
   {
     "slug": "netcat-101",
@@ -145,7 +176,7 @@
     "slug": "sanity-check",
     "title": "Sanity Check",
     "category": "misc",
-    "done": false,
+    "done": true,
     "techniques": [],
     "summary": ""
   },
