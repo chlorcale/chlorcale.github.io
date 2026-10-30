@@ -6,7 +6,7 @@ const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
 let feedmeCleanup = null;
-const ASSET_VERSION = '20261030-18';
+const ASSET_VERSION = '20261030-19';
 let markedPromise;
 let currentTrack = 0;
 const PLAYLIST = [
@@ -397,7 +397,8 @@ function initPipabo() {
   const update=()=>{const playing=!audio.paused;button.setAttribute('aria-pressed',String(playing));button.setAttribute('aria-label',playing?'Tắt Pipabo':'Bật Pipabo');button.title=playing?'Tắt Pipabo':'Bật Pipabo';};
   button.addEventListener('click',async()=>{if(audio.paused){try{await audio.play();}catch(_){button.title='Trình duyệt chặn tự phát; bấm lại để thử';}}else audio.pause();update();});
   audio.addEventListener('play',update);audio.addEventListener('pause',update);audio.addEventListener('ended',update);
-  audio.play().then(update).catch(update);
+  audio.pause();
+  update();
 }
 const MELANIE_FRAMES = Array.from({ length: 16 }, (_, i) => `assets/melanie-frames/frame-${String(i).padStart(2, '0')}.png`);
 let melanieFrame = 0, melaniePlaybackTimer = 0, melanieSlowTimer = 0;
