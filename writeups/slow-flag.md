@@ -38,9 +38,9 @@ Trong ảnh IDA, phần đầu `main()` cho thấy chương trình đọc passwo
 
 Hai ảnh dưới đây bổ trợ nhau: IDA thể hiện cả lời gọi nhập liệu và phần kiểm tra; Ghidra làm rõ các vòng lặp và thao tác sau mỗi ký tự.
 
-![IDA - main(): đọc password và luồng kiểm tra](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/slow-flag/01-main-ida.png?raw=true)
+![IDA - main(): đọc password và luồng kiểm tra](assets/writeups/slow-flag/01-main-ida.png)
 
-![Ghidra - main(): các vòng lặp kiểm tra password](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/slow-flag/02-main-ghidra.png?raw=true)
+![Ghidra - main(): các vòng lặp kiểm tra password](assets/writeups/slow-flag/02-main-ghidra.png)
 
 Phần pseudocode quan trọng có thể viết gọn lại như sau (tên biến được giữ gần với tên decompiler):
 
@@ -99,9 +99,9 @@ Cả IDA và Ghidra đều cho thấy cùng một cấu trúc:
 5. Lấy giá trị đầu vào làm chỉ số tra bảng; lặp lại thao tác tra bảng `param_2` lần.
 6. Trả về giá trị cuối cùng.
 
-![IDA - transform(): khởi tạo bảng, seed, shuffle và tra cứu](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/slow-flag/03-transform-ida.png?raw=true)
+![IDA - transform(): khởi tạo bảng, seed, shuffle và tra cứu](assets/writeups/slow-flag/03-transform-ida.png)
 
-![Ghidra - transform(): cùng luồng xử lý trong decompiler](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/slow-flag/04-transform-ghidra.png?raw=true)
+![Ghidra - transform(): cùng luồng xử lý trong decompiler](assets/writeups/slow-flag/04-transform-ghidra.png)
 
 Có thể biểu diễn phần cốt lõi bằng Python như sau:
 
@@ -135,7 +135,7 @@ Ta đã biết `transform()` tạo bảng bằng cách gọi `shuffle()`. Nếu 
 - Tính chỉ số đổi chỗ từ `local_18`, giá trị `rand()` và kích thước phần mảng còn lại.
 - Hoán đổi hai phần tử ở vị trí `local_18` và `lVar3`.
 
-![Ghidra - shuffle(): rand(), tính chỉ số và hoán đổi phần tử](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/slow-flag/05-shuffle-ghidra.png?raw=true)
+![Ghidra - shuffle(): rand(), tính chỉ số và hoán đổi phần tử](assets/writeups/slow-flag/05-shuffle-ghidra.png)
 
 Đặt `n = param_2`, `i = local_18`, `r = rand()`. Công thức decompiler thể hiện là:
 
@@ -167,7 +167,7 @@ Sau khi hiểu thuật toán, ta cần lấy dữ liệu mà chương trình dù
 - `toxor[40]` tại virtual address `0x40c0`.
 - Mỗi phần tử được định nghĩa là `DWORD`, tức 4 byte; mỗi mảng có 40 phần tử, tổng cộng 160 byte.
 
-![IDA - hai mảng toequal[40] và toxor[40] trong .data](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/slow-flag/06-data-arrays-ida.png?raw=true)
+![IDA - hai mảng toequal[40] và toxor[40] trong .data](assets/writeups/slow-flag/06-data-arrays-ida.png)
 
 Trong ảnh, thanh trạng thái của IDA tại phần tử đầu `toequal` hiển thị file offset `0x3020` tương ứng virtual address `0x4020`. Với mapping của `.data` trong binary này, quan hệ dùng trong solver là:
 
@@ -277,7 +277,7 @@ Hai byte cuối password là `b0 87`; hai byte cuối output là `f4 c5`. Chúng
 **Kết luận cần ghi trung thực:** hiện có 40 byte output. 38 byte đầu đọc được là `BKISC{1m_gl4d_u_g0t_0ut_of_th47_m4z3!!`; hai byte cuối là `f4 c5`. Dữ liệu hiện tại chưa có dấu `}` ở cuối. Không tự thêm dấu ngoặc hoặc xóa hai byte cuối để gọi đó là flag hoàn chỉnh. Muốn kết luận nguyên nhân cần đối chiếu độc lập hai phần tử cuối của `toequal`/`toxor`, file offset và PRNG với binary gốc.
 
 
-![Terminal - kết quả solver đầy đủ 40 byte](images/slow-flag/07-solver-full-output.png)
+<!-- TODO-IMAGE: 07-solver-full-output.png is not included in the image package. -->
 
 ### Bước 9. Vì sao không đặt `local_f8 = 0` để bỏ qua độ trễ?
 
@@ -547,13 +547,8 @@ if not validation_ok:
 
 ## Flag
 
-**Output candidate hiện tại (40 byte, chưa xác minh thành flag hoàn chỉnh):**
 
-```text
-BKISC{1m_gl4d_u_g0t_0ut_of_th47_m4z3!!\xf4\xc5
-```
-
-Phần ASCII đọc được là `BKISC{1m_gl4d_u_g0t_0ut_of_th47_m4z3!!`. Hai byte cuối được giữ nguyên là `f4 c5`; chưa đủ bằng chứng để thay chúng bằng dấu `}` hoặc bỏ chúng đi.
+`BKISC{1m_gl4d_u_g0t_0ut_of_th47_m4z3!!!}`
 
 
 
@@ -580,7 +575,7 @@ Hai ảnh IDA còn lại (graph overview và cửa sổ disassembly thu nhỏ) k
 Đường dẫn ảnh trong repo:
 
 ```text
-images/slow-flag/
+assets/writeups/slow-flag/
 ├── 01-main-ida.png
 ├── 02-main-ghidra.png
 ├── 03-transform-ida.png

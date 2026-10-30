@@ -6,7 +6,7 @@ const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
 let feedmeCleanup = null;
-const ASSET_VERSION = '20261030-20';
+const ASSET_VERSION = '20261031-3';
 let markedPromise;
 let currentTrack = 0;
 const PLAYLIST = [
@@ -462,12 +462,14 @@ function route() {
   renderHome(); syncMelanieMotion();
 }
 function renderFeedme() {
-  app.innerHTML = `<section class="feedme-page" tabindex="0"><header class="feedme-heading"><p class="event-stamp">DỰ ÁN NUÔI TÔI</p><h1>Feed me<span>!</span></h1><p>Chọn một trong ba ô thức ăn rồi nhấn <kbd>Enter</kbd> để cho mèo ăn.</p></header><div class="feedme-world"><div class="feedme-crosshair" aria-hidden="true">+</div><div class="feed-cat-stage"><img id="feed-cat" class="feed-cat" src="assets/cat.png" alt="Mèo đen đang chờ được cho ăn"><canvas id="feed-video-canvas" class="feed-video-canvas" aria-hidden="true"></canvas></div><video id="feed-video" src="assets/cat-clapping.mp4" preload="metadata" playsinline></video><div class="feed-counter" aria-live="polite">Time feeded: <strong id="feed-count">0</strong><small>lượt trên trình duyệt này</small></div><p class="feed-message" id="feed-message">Mèo đang đợi đồ ăn...</p><span class="feed-pixel-decor decor-a" aria-hidden="true">✦</span><span class="feed-pixel-decor decor-b" aria-hidden="true">✚</span><div class="feed-hotbar" role="group" aria-label="Túi đồ gồm 9 ô">${Array.from({length:9},(_,i)=>`<button class="feed-slot${i===0?' selected':''}" type="button" data-slot="${i}" aria-label="Ô ${i+1}${i<3?', thức ăn'+(i+1):''}${i===0?', đang chọn':''}" ${i===0?'aria-pressed="true"':'aria-pressed="false"'}>${i<3?`<img src="assets/food${i+1}.png" alt=""><span class="feed-amount">∞</span>`:''}</button>`).join('')}</div></div><p class="feed-disclaimer">Bộ đếm chỉ lưu trên trình duyệt hiện tại. GitHub Pages không có máy chủ để cộng lượt cho mọi khách truy cập.</p></section>`;
+  const foodNames=['Gói nạp lần đầu','Gói trùm server','Gói hữu duyên'];
+  app.innerHTML = `<section class="feedme-page" tabindex="0"><header class="feedme-heading"><p class="event-stamp">DỰ ÁN NUÔI TÔI</p><h1>Feed me<span>!</span></h1><p>Chọn một trong ba ô thức ăn rồi nhấn <kbd>Enter</kbd> để cho mèo ăn.</p></header><div class="feedme-world"><div class="feedme-crosshair" aria-hidden="true">+</div><div class="feed-flight-layer" aria-hidden="true"></div><div class="feed-cat-stage"><img id="feed-cat" class="feed-cat" src="assets/cat.png" alt="Mèo đen đang chờ được cho ăn"><canvas id="feed-video-canvas" class="feed-video-canvas" aria-hidden="true"></canvas></div><video id="feed-video" src="assets/cat-clapping.mp4" preload="metadata" playsinline></video><div class="feed-counter" aria-live="polite">Time feeded: <strong id="feed-count">0</strong><small>lượt trên trình duyệt này</small></div><p class="feed-message" id="feed-message">Mèo đang đợi đồ ăn...</p><span class="feed-pixel-decor decor-a" aria-hidden="true">✦</span><span class="feed-pixel-decor decor-b" aria-hidden="true">✚</span><div class="feed-hotbar" role="group" aria-label="Túi đồ gồm 9 ô">${Array.from({length:9},(_,i)=>`<button class="feed-slot${i===0?' selected':''}" type="button" data-slot="${i}" aria-label="Ô ${i+1}${i<3?', '+foodNames[i]:''}${i===0?', đang chọn':''}" ${i===0?'aria-pressed="true"':'aria-pressed="false"'}>${i<3?`<span class="feed-slot-tag">${foodNames[i]}</span><img src="assets/food${i+1}.png" alt=""><span class="feed-amount">∞</span>`:''}</button>`).join('')}</div></div><p class="feed-disclaimer">Bộ đếm chỉ lưu trên trình duyệt hiện tại. GitHub Pages không có máy chủ để cộng lượt cho mọi khách truy cập.</p></section>`;
   initFeedme();
 }
 function initFeedme() {
-  const page=document.querySelector('.feedme-page'), stage=page.querySelector('.feed-cat-stage'), video=document.getElementById('feed-video'), canvas=document.getElementById('feed-video-canvas'), ctx=canvas.getContext('2d',{willReadFrequently:true}), counter=document.getElementById('feed-count'), message=document.getElementById('feed-message');
+  const page=document.querySelector('.feedme-page'), world=page.querySelector('.feedme-world'), stage=page.querySelector('.feed-cat-stage'), video=document.getElementById('feed-video'), canvas=document.getElementById('feed-video-canvas'), ctx=canvas.getContext('2d',{willReadFrequently:true}), counter=document.getElementById('feed-count'), message=document.getElementById('feed-message'), ting=document.getElementById('feed-ting'), eating=document.getElementById('feed-eating'), flightLayer=page.querySelector('.feed-flight-layer');
   const slots=[...page.querySelectorAll('.feed-slot')]; let frame=0;
+  let feeding=false, session=0, timers=[];
   page.focus({preventScroll:true});
   try { counter.textContent=localStorage.getItem('chlor-feed-count')||'0'; } catch (_) { counter.textContent='0'; }
   const paint=()=>{
@@ -480,20 +482,57 @@ function initFeedme() {
     ctx.putImageData(frameData,0,0);
     frame=requestAnimationFrame(paint);
   };
+  const playSfx=audio=>new Promise(resolve=>{
+    const done=()=>{audio.removeEventListener('ended',done);audio.removeEventListener('error',done);audio.removeEventListener('pause',done);resolve();};
+    audio.addEventListener('ended',done,{once:true});audio.addEventListener('error',done,{once:true});audio.addEventListener('pause',done,{once:true});
+    audio.currentTime=0;audio.play().catch(done);
+  });
+  const launchFood=slot=>new Promise(resolve=>{
+    const image=slot.querySelector('img');if(!image){resolve();return;}
+    const worldRect=world.getBoundingClientRect(),slotRect=slot.getBoundingClientRect(),target=stage.getBoundingClientRect();
+    const flyer=document.createElement('img');flyer.className='feed-flyer';flyer.src=image.src;flyer.alt='';
+    flyer.style.left=`${slotRect.left+slotRect.width/2-worldRect.left}px`;flyer.style.top=`${slotRect.top+slotRect.height/2-worldRect.top}px`;
+    flyer.style.setProperty('--fly-x',`${target.left+target.width/2-(slotRect.left+slotRect.width/2)}px`);flyer.style.setProperty('--fly-y',`${target.top+target.height/2-(slotRect.top+slotRect.height/2)}px`);
+    flightLayer.append(flyer);
+    const burst=document.createElement('div');burst.className='feed-food-burst';burst.style.left=`${target.left+target.width/2-worldRect.left}px`;burst.style.top=`${target.top+target.height/2-worldRect.top}px`;
+    for(let i=0;i<2;i++){
+      const icon=document.createElement('img');
+      icon.src=image.src;icon.alt='';icon.className=`burst-food burst-food-${i}`;
+      icon.style.setProperty('--burst-delay',`${i*.12}s`);burst.append(icon);
+    }
+    flightLayer.append(burst);
+    let settled=false;const finish=()=>{if(settled)return;settled=true;clearTimeout(fallback);resolve();};
+    flyer.addEventListener('animationend',()=>{flyer.remove();burst.classList.add('active');finish();},{once:true});
+    const fallback=setTimeout(()=>{flyer.remove();burst.classList.add('active');finish();},700);timers.push(fallback);
+    flyer.addEventListener('error',()=>{flyer.remove();burst.classList.add('active');finish();},{once:true});
+  });
+  const showClap=async run=>{
+    if(run!==session)return;
+    stage.classList.add('clapping');canvas.classList.add('playing');video.currentTime=0;video.muted=false;
+    try{await video.play();paint();}catch(_){canvas.classList.remove('playing');stage.classList.remove('clapping');message.textContent='Không phát được video mèo.';feeding=false;}
+  };
   const feed=async()=>{
+    if(feeding)return;
+    feeding=true;const run=++session;
     let count=Number(counter.textContent)||0; count++;
     counter.textContent=String(count); message.textContent='Yum! Mèo cảm ơn bạn ♥';
     try{localStorage.setItem('chlor-feed-count',String(count));}catch(_){}
-    canvas.classList.add('playing');stage.classList.add('clapping');
-    try{video.currentTime=0; await video.play(); paint();}catch(_){canvas.classList.remove('playing');stage.classList.remove('clapping');message.textContent='Không phát được video. Thử nhấn cho ăn lại nhé.';}
+    const selected=page.querySelector('.feed-slot.selected');
+    const flight=launchFood(selected);
+    await playSfx(ting);if(run!==session)return;
+    const eatSound=playSfx(eating);
+    await flight;if(run!==session)return;
+    await eatSound;if(run!==session)return;
+    flightLayer.querySelectorAll('.feed-food-burst').forEach(el=>{el.classList.remove('active');el.remove();});
+    await showClap(run);
   };
   slots.forEach(slot=>{
     slot.addEventListener('click',()=>{slots.forEach(s=>{s.classList.remove('selected');s.setAttribute('aria-pressed','false');});slot.classList.add('selected');slot.setAttribute('aria-pressed','true');});
   });
   page.addEventListener('keydown',e=>{const selected=Number(page.querySelector('.feed-slot.selected')?.dataset.slot);if(e.key==='Enter'&&!e.repeat&&selected>=0&&selected<3){e.preventDefault();feed();}});
-  video.addEventListener('ended',()=>{cancelAnimationFrame(frame);canvas.classList.remove('playing');stage.classList.remove('clapping');message.textContent='Mèo đang đợi thêm đồ ăn...';});
-  video.addEventListener('error',()=>{canvas.classList.remove('playing');stage.classList.remove('clapping');message.textContent='Không tải được video mèo.';});
-  feedmeCleanup=()=>{cancelAnimationFrame(frame);video.pause();};
+  video.addEventListener('ended',()=>{cancelAnimationFrame(frame);canvas.classList.remove('playing');stage.classList.remove('clapping');message.textContent='Mèo đang đợi thêm đồ ăn...';feeding=false;});
+  video.addEventListener('error',()=>{canvas.classList.remove('playing');stage.classList.remove('clapping');message.textContent='Không tải được video mèo.';feeding=false;});
+  feedmeCleanup=()=>{session++;feeding=false;cancelAnimationFrame(frame);timers.forEach(clearTimeout);flightLayer.replaceChildren();video.pause();ting.pause();eating.pause();};
 }
 function categories() { return [...new Set(DB.map(w => w.category))].sort((a,b) => (Object.keys(CATS).indexOf(a) < 0 ? 99 : Object.keys(CATS).indexOf(a)) - (Object.keys(CATS).indexOf(b) < 0 ? 99 : Object.keys(CATS).indexOf(b))); }
 function renderHome() {
