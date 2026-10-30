@@ -133,6 +133,10 @@ body.feedme-open .feed-disclaimer{flex:none;margin:0 auto;font-size:9px}
 @media(max-width:700px){body.feedme-open>#app{height:calc(100svh - 112px);padding:12px 18px 62px}.feedme-world .feed-cat-stage{width:clamp(130px,36vw,220px);height:clamp(150px,31vh,250px)}}
 @media(max-height:680px) and (min-width:701px){body.feedme-open>#app{padding-top:6px;padding-bottom:64px}.feedme-page{gap:5px!important}.feedme-heading h1{font-size:23px!important}.feedme-world .feed-cat-stage{height:clamp(140px,30vh,210px)}}
 .feed-slot img{display:block;width:82%;height:82%;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(2px 2px #333)}
+.pipabo-toggle{display:grid;place-items:center;width:36px;height:36px;padding:4px;border:1px solid var(--line);background:var(--paper);box-shadow:2px 2px 0 color-mix(in srgb,var(--cat-crypto) 32%,transparent)}
+.pipabo-toggle img{display:block;width:24px;height:24px;object-fit:contain;image-rendering:pixelated}
+.pipabo-toggle[aria-pressed="true"]{border-color:var(--accent);box-shadow:2px 2px 0 var(--accent)}
+#pipabo-track{display:none}
 body.feedme-open>#app{max-width:none;width:100%;padding-left:clamp(14px,3vw,54px);padding-right:clamp(14px,3vw,54px);height:calc(100svh - 84px)}
 body.feedme-open .feedme-page{width:100%;max-width:none}
 body.feedme-open .feedme-heading{width:max-content;max-width:100%;margin-left:auto;margin-right:auto}

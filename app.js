@@ -6,7 +6,7 @@ const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
 let feedmeCleanup = null;
-const ASSET_VERSION = '20261030-17';
+const ASSET_VERSION = '20261030-18';
 let markedPromise;
 let currentTrack = 0;
 const PLAYLIST = [
@@ -389,6 +389,16 @@ function initMusic() {
     mute.textContent = audio.muted ? '🔇' : '🔊';
   });
 }
+
+function initPipabo() {
+  const audio=document.getElementById('pipabo-track'),button=document.getElementById('pipabo-toggle');
+  if(!audio||!button)return;
+  audio.volume=.22;
+  const update=()=>{const playing=!audio.paused;button.setAttribute('aria-pressed',String(playing));button.setAttribute('aria-label',playing?'Tắt Pipabo':'Bật Pipabo');button.title=playing?'Tắt Pipabo':'Bật Pipabo';};
+  button.addEventListener('click',async()=>{if(audio.paused){try{await audio.play();}catch(_){button.title='Trình duyệt chặn tự phát; bấm lại để thử';}}else audio.pause();update();});
+  audio.addEventListener('play',update);audio.addEventListener('pause',update);audio.addEventListener('ended',update);
+  audio.play().then(update).catch(update);
+}
 const MELANIE_FRAMES = Array.from({ length: 16 }, (_, i) => `assets/melanie-frames/frame-${String(i).padStart(2, '0')}.png`);
 let melanieFrame = 0, melaniePlaybackTimer = 0, melanieSlowTimer = 0;
 const MELANIE_FRAME_CACHE = MELANIE_FRAMES.map(src => { const image = new Image(); image.src = src; return image; });
@@ -431,7 +441,7 @@ function initMelanieMotion() {
 }
 async function load() {
   // Mỗi phần khởi tạo chạy riêng: lỗi ở hiệu ứng/nhạc không được chặn việc tải danh sách bài.
-  for (const init of [initTheme, initMusic, initMelanieMotion, initBullSheet]) {
+  for (const init of [initTheme, initMusic, initPipabo, initMelanieMotion, initBullSheet]) {
     try { init(); } catch (e) { console.error(`[${init.name}]`, e); }
   }
   try { const r = await fetchFresh('writeups/index.json'); if (!r.ok) throw new Error('index'); DB = await r.json(); route(); }

@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap&subset=vietnamese">
-<link rel="stylesheet" href="style.css?v=20261030-12">
+<link rel="stylesheet" href="style.css?v=20261030-13">
 </head>
 <body>
 <header class="top">
@@ -22,6 +22,7 @@
     <a href="#/" data-v="home">Bài viết</a>
     <a href="#/about" data-v="about">Giới thiệu</a>
     <a href="#/feedme" data-v="feedme">Feed me</a>
+    <button id="pipabo-toggle" class="pipabo-toggle" type="button" aria-label="Bật Pipabo" aria-pressed="false" title="Bật/tắt Pipabo"><img src="assets/pipabo.ico" alt=""></button>
     <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Đổi giao diện" aria-pressed="false">◐</button>
   </nav>
 </header>
@@ -47,6 +48,7 @@
   </div>
   <button class="dock-strip" id="music-panel-toggle" type="button" aria-expanded="false" aria-controls="music-dock-panel"><span class="dock-led"></span><span>NOW PLAYING</span><strong id="dock-title">Thiệp Hồng Sai Tên</strong><span class="dock-note">♫</span></button>
   <audio id="site-track" preload="none"></audio>
+  <audio id="pipabo-track" src="assets/pipabo.mp3" preload="none" loop></audio>
   <audio id="dio-sfx" preload="auto" src="assets/Za%20Warudo%20Time%20stop%20sound%20effect%20%2B%20DIO%20HTFT%20voice%20line.mp3"></audio>
 </aside>
 <div id="bullsheet-overlay" class="bullsheet-overlay" aria-hidden="true">
@@ -76,7 +78,7 @@
   <canvas id="jupiter-ruins" class="jupiter-ruins" aria-hidden="true"></canvas>
   <button id="bullsheet-reset" class="bullsheet-reset" type="button">RESET EFFECT · ESC</button>
 </div>
-<script src="app.js?v=20261030-17"></script>
+<script src="app.js?v=20261030-18"></script>
 <script src="rain.js?v=20261029-2"></script>
 </body>
 </html>

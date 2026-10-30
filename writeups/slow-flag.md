@@ -620,7 +620,7 @@ BKISC{1m_gl4d_u_g0t_0ut_of_th47_m4z3!!\xf4\xc5
 
 Hai byte cuối vẫn là `F4 C5`, chưa xác định được nguyên nhân và chưa đủ cơ sở để khẳng định flag hoàn chỉnh.
 
-<!-- TODO-WRITEUP -->
+
 
 ## Checklist ảnh Ghidra cần bổ sung
 

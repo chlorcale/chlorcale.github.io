@@ -98,9 +98,16 @@
     "slug": "slow-flag",
     "title": "Slow Flag",
     "category": "reverse",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "static-analysis",
+      "elf64",
+      "prng-reconstruction",
+      "permutation-cycle-decomposition",
+      "modular-exponentiation",
+      "xor"
+    ],
+    "summary": "Phân tích ELF tĩnh, tái tạo phép hoán vị byte từ PRNG có seed cố định và đảo hàng tỷ lần biến đổi bằng phân rã chu kỳ."
   },
   {
     "slug": "please-do-reverse",
