@@ -153,8 +153,13 @@
     "slug": "rsa",
     "title": "RSA?",
     "category": "crypto",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "binomial-expansion",
+      "gcd-factor-recovery",
+      "rsa-decryption",
+      "book-cipher"
+    ],
+    "summary": "Lấy p, q từ (2p±3q)^e mod N bằng khai triển nhị thức và gcd, giải RSA, rồi giải book cipher (cột, dòng) trên docstring của đề."
   }
 ]

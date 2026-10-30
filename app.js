@@ -210,7 +210,7 @@ function renderHome() {
   const cats = categories();
   const counts = Object.fromEntries(cats.map(c => [c, DB.filter(w => w.category === c).length]));
   const done = DB.filter(w => w.done).length;
-  app.innerHTML = `<section class="hero"><div class="melanie-corner" aria-hidden="true"><img src="assets/melanie-hcmut.webp" alt=""></div><div class="hero-copy"><p class="event-stamp">BKISC-Recruitment-CTF 2026</p><h1>chlorcale<span>/writeups</span></h1><p class="lede">Sổ tay bài giải CTF — ghi lại cách nghĩ, công cụ và đường đi đến flag.</p></div>
+  app.innerHTML = `<section class="hero"><div class="melanie-corner" aria-hidden="true"><img src="assets/melanie-hcmut.webp" alt=""></div><div class="hero-copy"><p class="event-stamp">BKISC-Recruitment-CTF 2026</p><h1>chlorcale<span>/writeups</span></h1><p class="lede">Blog Page CTF ghi các writeup của NMHP</p></div>
     <div class="overview"><div class="distribution" aria-label="Phân bố bài theo mảng">${cats.map(c => `<button class="dist-segment ${state.cat===c?'selected':''}" data-cat="${esc(c)}" style="--cat:${COLORS[c]||COLORS.misc};--share:${counts[c]/DB.length}" title="${esc(catName(c))}: ${counts[c]} bài" aria-label="Lọc ${esc(catName(c))}, ${counts[c]} bài"></button>`).join('')}</div>
     <div class="dist-labels">${cats.map(c => `<button class="dist-label" data-cat="${esc(c)}"><i style="--cat:${COLORS[c]||COLORS.misc}"></i>${esc(catName(c))} <span>${counts[c]}</span></button>`).join('')}</div>
     <p class="stats"><strong>${DB.length}</strong> bài đã giải <span>·</span> <strong>${done}</strong> bài có writeup</p></div></section>
