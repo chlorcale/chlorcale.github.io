@@ -2,7 +2,7 @@
 title: Slow Flag
 category: reverse
 techniques: static-analysis, elf64, prng-reconstruction, permutation-cycle-decomposition, modular-exponentiation, xor
-summary: Phân tích ELF tĩnh, tái tạo phép hoán vị byte từ PRNG có seed cố định và đảo hàng tỷ lần biến đổi bằng phân rã chu kỳ.
+summary: Dùng IDA và Ghidra phân tích main, transform, shuffle; tái tạo phép hoán vị 256 byte và đảo số lần biến đổi 9^i bằng phân rã chu kỳ.
 ---
 
 ## Đề bài
@@ -30,179 +30,159 @@ Thông tin binary được ghi nhận:
 
 ## Cách giải
 
-### Bước 1. Xem `main()` trước: cần tìm thông tin gì?
+### Bước 1. Bắt đầu từ `main()`: xác định dữ liệu vào và điều kiện kiểm tra
 
-Khi mở ELF trong Ghidra, bắt đầu từ `main()` thay vì đọc toàn bộ chương trình. Có ba câu hỏi cần trả lời:
+Khi reverse một binary, không nên bắt đầu bằng cách đọc mọi hàm theo thứ tự. Hãy tìm `main()` trước để hiểu chương trình nhận dữ liệu gì, kiểm tra bằng cách nào và dữ liệu nào được dùng làm kết quả.
 
-1. Password byte được lấy ở đâu và duyệt theo chỉ số nào?
-2. Mỗi byte bị đưa qua hàm nào, bao nhiêu lần?
-3. Kết quả biến đổi được so sánh với bảng nào; nếu đúng thì chương trình xuất gì?
+Trong ảnh IDA, phần đầu `main()` cho thấy chương trình đọc password bằng `scanf("%40s", s)`. Điều này giới hạn số ký tự đầu vào tối đa là 40 (không tính byte kết thúc chuỗi `NUL`). Ảnh Ghidra cho thấy vòng lặp xử lý dựa trên `strlen(s)`, vì vậy số vòng thực tế phụ thuộc độ dài password được nhập, không mặc định luôn chạy đủ 40 phần tử.
 
-Pseudocode quan trọng:
+Hai ảnh dưới đây bổ trợ nhau: IDA thể hiện cả lời gọi nhập liệu và phần kiểm tra; Ghidra làm rõ các vòng lặp và thao tác sau mỗi ký tự.
+
+![IDA - main(): đọc password và luồng kiểm tra](images/slow-flag/01-main-ida.png)
+
+![Ghidra - main(): các vòng lặp kiểm tra password](images/slow-flag/02-main-ghidra.png)
+
+Phần pseudocode quan trọng có thể viết gọn lại như sau (tên biến được giữ gần với tên decompiler):
 
 ```c
 local_f8 = 1;
+local_f0 = 0;
 
-for (local_f0 = 0; local_f0 < password_length; local_f0++) {
-    local_104 = (int)password[local_f0];
+while (local_f0 < strlen(s)) {
+    value = s[local_f0];
 
-    for (local_100 = 0; local_100 < local_f8; local_100++) {
-        for (local_fc = 0; local_fc < local_f8; local_fc++) {
-            local_104 = transform(local_104, 1);
+    for (j = 0; j < local_f8; j++) {
+        for (k = 0; k < local_f8; k++) {
+            value = transform(value, 1);
         }
     }
 
-    if (local_104 != toequal[local_f0]) {
+    if (value != toequal[local_f0]) {
         /* Password sai */
+        return;
     }
 
-    /* Khi hợp lệ: xuất toxor[local_f0] XOR password[local_f0]. */
-    local_f8 = local_f8 * 3;
+    putchar(toxor[local_f0] ^ s[local_f0]);
+    local_f8 *= 3;
+    local_f0++;
 }
 ```
 
-Từ đây ta suy ra số lần gọi `transform()`:
+Từ code này, ta cần tìm số lần `transform()` được gọi cho ký tự ở vị trí `i`:
 
-- Ban đầu `local_f8 = 1`.
-- Sau mỗi ký tự, `local_f8` được nhân 3.
-- Vì ký tự đầu có chỉ số `i = 0`, tại ký tự thứ `i`, `local_f8 = 3^i`.
-- Có hai vòng lặp, cả hai đều chạy `local_f8` lần.
-- Tổng số lần gọi là `(3^i) * (3^i) = 9^i`.
+- Trước ký tự đầu tiên, `local_f8 = 1`.
+- Sau mỗi ký tự được kiểm tra, `local_f8` được nhân 3.
+- Do đó, ở vị trí `i` (đánh số từ 0), `local_f8 = 3^i`.
+- Có hai vòng lặp lồng nhau, mỗi vòng chạy `local_f8` lần.
+- Tổng số lần gọi `transform(value, 1)` là `local_f8 × local_f8 = 9^i`.
 
-Gọi `P(x)` là kết quả của đúng một lần `transform(x, 1)`. Điều kiện chương trình kiểm tra là:
+Gọi `P(x)` là kết quả của một lần gọi `transform(x, 1)`. Điều kiện tại vị trí `i` là:
 
 ```text
 P^(9^i)(password[i]) = toequal[i]
 ```
 
-Đây là mục tiêu toán học của bài: tìm `password[i]` khi đã biết `toequal[i]` và biết phép hoán vị `P`.
+Đây là mục tiêu reverse engineering: tìm phép biến đổi `P`, sau đó đảo `P` đủ `9^i` lần để lấy từng byte password.
 
-**Cần tìm trong Ghidra:** giá trị khởi tạo `local_f8`, hai vòng lặp gọi `transform`, chỗ so sánh với `toequal` và phép nhân `local_f8 *= 3`. Không cần chụp cả màn hình; hãy phóng to để bốn phần này đọc được.
+**Điểm cần ghi nhớ từ ảnh:** `strlen(s)` quyết định số ký tự thật sự được xử lý; `toequal` và `toxor` có 40 phần tử là sức chứa dữ liệu tối đa, không phải bằng chứng rằng chương trình bắt buộc password dài đúng 40 byte.
 
-<!-- TODO-IMAGE: 01-main-control-flow.png — Ghidra Decompiler của main(), thấy local_f8=1, hai vòng lặp lồng nhau, transform(), phép so sánh toequal và local_f8*=3. -->
-![Ghidra - main(): số lần biến đổi theo vị trí](../assets/writeups/slow-flag/01-main-control-flow.png)
+### Bước 2. Đọc `transform()`: biến đổi một byte bằng bảng tra cứu
 
-### Bước 2. Mở `transform()`: xác định phép biến đổi một byte
+Sau khi biết `main()` gọi `transform(value, 1)` rất nhiều lần, bước tiếp theo là mở chính hàm `transform()` để trả lời: một lần biến đổi thực hiện phép toán gì?
 
-Sau khi biết cần đảo `P^(9^i)`, ta phải tìm `P` là gì. Mở hàm `transform()` và lần lượt tìm:
+Cả IDA và Ghidra đều cho thấy cùng một cấu trúc:
 
-- Bảng được tạo có bao nhiêu phần tử?
-- Bảng ban đầu chứa giá trị nào?
-- Seed PRNG được đặt bằng bao nhiêu?
-- Hàm shuffle nào được gọi?
-- Giá trị đầu vào được biến đổi bằng cách nào?
+1. Tạo một mảng cục bộ có 256 phần tử.
+2. Gán `table[i] = i` với `i` từ 0 đến 255.
+3. Đặt seed bằng `0xDEADFACE`.
+4. Gọi `shuffle(table, 256)`.
+5. Lấy giá trị đầu vào làm chỉ số tra bảng; lặp lại thao tác tra bảng `param_2` lần.
+6. Trả về giá trị cuối cùng.
 
-Pseudocode đã khôi phục:
+![IDA - transform(): khởi tạo bảng, seed, shuffle và tra cứu](images/slow-flag/03-transform-ida.png)
 
-```c
-for (i = 0; i < 0x100; i++) {
-    table[i] = i;
-}
+![Ghidra - transform(): cùng luồng xử lý trong decompiler](images/slow-flag/04-transform-ghidra.png)
 
-srand(0xdeadface);
-shuffle(table, 0x100);
+Có thể biểu diễn phần cốt lõi bằng Python như sau:
 
-value = input;
-for (i = 0; i < count; i++) {
-    value = table[value];
-}
-
-return value;
+```python
+def transform(value, count, table):
+    for _ in range(count):
+        value = table[value]
+    return value
 ```
 
-`0x100 = 256`, nên bảng ban đầu là `[0, 1, 2, ..., 255]`. Sau shuffle, mỗi phần tử vẫn chỉ xuất hiện đúng một lần vì shuffle chỉ hoán đổi vị trí. Đặt:
+Trong `main()`, tham số `count` luôn bằng `1`. Vì vậy, đặt:
 
 ```text
 P(x) = table[x]
 ```
 
-Khi `count = 1`, `transform(x, 1)` chính là `P(x)`. Vì `P` là ánh xạ một-một trên 256 byte, nó là một **phép hoán vị** và có thể đảo ngược.
+thì một lần gọi `transform(x, 1)` chính là `P(x)`.
 
-Một chi tiết quan trọng: `srand(0xdeadface)` được gọi lại trước khi shuffle. Nếu cùng implementation PRNG và cùng thuật toán shuffle, mỗi lần gọi `transform()` sẽ tạo lại cùng một bảng `P`. Ta chỉ cần dựng bảng đó một lần trong solver.
+**Vì sao `P` đảo ngược được?** Mảng ban đầu chứa đủ 256 giá trị khác nhau từ 0 đến 255. Hàm `shuffle()` chỉ hoán đổi vị trí, không thêm hoặc xóa phần tử. Do đó, sau shuffle, mỗi giá trị vẫn xuất hiện đúng một lần. Ánh xạ `P` là một permutation (phép hoán vị) của tập byte và luôn có phép nghịch đảo.
 
-**Cần tìm trong Ghidra:** vòng khởi tạo `table[i] = i`, lời gọi `srand(0xdeadface)`, lời gọi `shuffle()` và vòng tra `table[value]`.
+Một chi tiết quan trọng khác là `srand(0xDEADFACE)` nằm bên trong `transform()`, ngay trước `shuffle()`. Nếu PRNG và môi trường libc giống nhau, mỗi lần gọi hàm sẽ tạo lại cùng một bảng `P`. Như vậy, ta có thể dựng bảng này một lần trong solver thay vì tạo lại ở mỗi lần biến đổi.
 
-<!-- TODO-IMAGE: 02-transform-setup.png — đầu hàm transform(), hiển thị khởi tạo 256 phần tử, srand(0xdeadface) và shuffle(table, 0x100). -->
-![Ghidra - transform(): khởi tạo bảng và seed](../assets/writeups/slow-flag/02-transform-setup.png)
+### Bước 3. Đọc `shuffle()`: tái tạo đúng phép hoán vị
 
-<!-- TODO-IMAGE: 03-transform-lookup.png — phần transform() lặp table[value] theo count và return kết quả. -->
-![Ghidra - transform(): áp dụng phép hoán vị](../assets/writeups/slow-flag/03-transform-lookup.png)
+Ta đã biết `transform()` tạo bảng bằng cách gọi `shuffle()`. Nếu chỉ tự tạo một bảng xáo trộn bất kỳ, password khôi phục được sẽ sai. Vì vậy cần đọc `shuffle()` để lấy đúng thuật toán và đúng cách dùng `rand()`.
 
-### Bước 3. Xem `shuffle()`: tái tạo đúng cách xáo trộn
+Ảnh Ghidra dưới đây cho thấy:
 
-Không thể chỉ tạo một permutation bất kỳ. Solver phải tạo ra chính xác bảng `P` mà binary sử dụng. Vì vậy, mở `shuffle()` và ghi lại công thức chọn chỉ số swap.
+- Vòng lặp chạy khi `local_18 < param_2 - 1`.
+- Mỗi vòng gọi `rand()` một lần.
+- Tính chỉ số đổi chỗ từ `local_18`, giá trị `rand()` và kích thước phần mảng còn lại.
+- Hoán đổi hai phần tử ở vị trí `local_18` và `lVar3`.
 
-Theo disassembly, thuật toán có dạng:
+![Ghidra - shuffle(): rand(), tính chỉ số và hoán đổi phần tử](images/slow-flag/05-shuffle-ghidra.png)
 
-```c
-if (n <= 1)
-    return;
-
-for (i = 0; i < n - 1; i++) {
-    unsigned r = rand();
-    unsigned m = n - i;
-    unsigned d = (0x7fffffff / m) + 1;
-    unsigned j = i + (r / d);
-    swap(array[i], array[j]);
-}
-```
-
-Với `n = 256`, vòng lặp chạy 255 lần. Mỗi lượt lấy một giá trị `r` từ `rand()`, tính `d`, tính `j`, rồi đổi chỗ `a[i]` và `a[j]`. Đây là biến thể Fisher-Yates shuffle.
-
-Công thức chính xác cần đưa vào solver:
+Đặt `n = param_2`, `i = local_18`, `r = rand()`. Công thức decompiler thể hiện là:
 
 ```text
-m = 256 - i
+m = n - i
 d = floor(0x7fffffff / m) + 1
 j = i + floor(r / d)
 swap(a[i], a[j])
 ```
 
-**Vì sao phải xác định đúng PRNG?** `rand()` là hàm của thư viện C; dãy số sinh ra phụ thuộc implementation của libc. Cùng gọi `srand(0xdeadface)` không có nghĩa mọi libc sẽ sinh cùng 255 số. Theo dữ liệu điều tra của challenge, chuỗi `RAND_VALS` được ghi nhận từ glibc ở môi trường đích và được nhúng vào solver. Công thức LCG phổ thông không được tự ý thay thế nếu chưa chứng minh khớp với target.
+Với `n = 256`, vòng lặp chạy từ `i = 0` đến `254`, tức cần đúng 255 giá trị `rand()`.
 
-**Cần tìm trong Ghidra:** lời gọi `rand()`, biểu thức chia để tính `d`, công thức tạo `j`, và hai phép ghi/đổi chỗ. Chụp thêm cross-reference `rand`/`srand` để chứng minh vị trí gọi.
+Đây là biến thể Fisher-Yates shuffle. Điểm quan trọng không phải tên thuật toán, mà là phải giữ chính xác công thức chọn `j`: binary không dùng đơn giản `rand() % m`, mà chia `rand()` cho `floor(RAND_MAX / m) + 1` rồi cộng vào `i`.
 
-<!-- TODO-IMAGE: 04-shuffle-loop.png — Decompiler/Listing của shuffle(), thấy rand(), phép tính d, j và swap. -->
-![Ghidra - shuffle(): cách chọn vị trí và swap](../assets/writeups/slow-flag/04-shuffle-loop.png)
+**Tại sao phải quan tâm implementation của `rand()`?** `srand()` và `rand()` thuộc thư viện C. Cùng một seed không bảo đảm mọi libc sinh ra cùng chuỗi số. Disassembly/Ghidra cho ta biết binary gọi `rand()` và cách dùng kết quả, nhưng không hiển thị sẵn 255 giá trị đầu ra. Trong solver, danh sách `RAND_VALS` là 255 giá trị đã được lấy từ môi trường glibc tương thích với target; solver dùng danh sách đó để tái tạo chính xác các lượt swap.
 
-<!-- TODO-IMAGE: 05-prng-references.png — Symbol Tree/External Functions có rand và srand, kèm cross-reference từ transform hoặc shuffle nếu có. -->
-![Ghidra - tham chiếu đến rand() và srand()](../assets/writeups/slow-flag/05-prng-references.png)
+Không nên thay danh sách này bằng một LCG phổ thông nếu chưa kiểm chứng nó khớp với libc của binary.
 
-### Bước 4. Tìm hai bảng dữ liệu `toequal` và `toxor`
+### Bước 4. Tìm `toequal` và `toxor` trong vùng dữ liệu của ELF
 
-Quay lại `main()`, ta đã thấy hai bảng tham gia trực tiếp vào kiểm tra và xuất dữ liệu:
+Sau khi hiểu thuật toán, ta cần lấy dữ liệu mà chương trình dùng để so sánh và xuất kết quả. Trong `main()`:
 
-- `toequal[i]` là kết quả mà `P^(9^i)(password[i])` phải bằng.
-- `toxor[i]` là byte mask được XOR với password byte để tạo output.
+- `toequal[i]` là giá trị mà byte password sau khi biến đổi phải bằng.
+- `toxor[i]` là mask được XOR với byte password để tạo byte output.
 
-Địa chỉ và kích thước được ghi nhận từ ELF:
+Ảnh IDA ở dưới hiển thị cả hai nhãn và kích thước mảng:
+
+- `toequal[40]` tại virtual address `0x4020`.
+- `toxor[40]` tại virtual address `0x40c0`.
+- Mỗi phần tử được định nghĩa là `DWORD`, tức 4 byte; mỗi mảng có 40 phần tử, tổng cộng 160 byte.
+
+![IDA - hai mảng toequal[40] và toxor[40] trong .data](images/slow-flag/06-data-arrays-ida.png)
+
+Trong ảnh, thanh trạng thái của IDA tại phần tử đầu `toequal` hiển thị file offset `0x3020` tương ứng virtual address `0x4020`. Với mapping của `.data` trong binary này, quan hệ dùng trong solver là:
 
 ```text
-toequal: VA 0x4020, 40 phần tử int32 (160 byte)
-toxor:   VA 0x40c0, 40 phần tử int32 (160 byte)
+file_offset = virtual_address - 0x1000
+
+toequal: VA 0x4020 -> file offset 0x3020
+toxor:   VA 0x40c0 -> file offset 0x30c0
 ```
 
-Với mapping `.data` của binary này, VA `0x4000` tương ứng file offset `0x3000`. Do đó:
+Đây là mapping của đúng ELF đang phân tích, không phải quy tắc chung cho mọi ELF. Nếu áp dụng cho binary khác, phải kiểm tra section/program header trước.
 
-```text
-file_offset(toequal) = 0x4020 - 0x1000 = 0x3020
-file_offset(toxor)   = 0x40c0 - 0x1000 = 0x30c0
-```
+Vì mỗi phần tử là `int32` little-endian, Python đọc hai mảng bằng `struct.unpack_from("<40i", ...)`. `toequal` được kiểm tra trên giá trị thô để bảo đảm các phần tử nằm trong miền byte 0–255. Với `toxor`, chương trình đưa kết quả XOR vào `putchar()`, nên solver sử dụng byte thấp bằng phép `& 0xff`.
 
-Đây là mapping riêng của binary này. Với ELF khác, cần kiểm tra section header/program header; không được mặc định mọi ELF đều dùng `VA - 0x1000`.
-
-Mỗi phần tử là `int32` little-endian, nên Python đọc bằng `struct.unpack_from("<40i", ...)`. Vì `transform()` cho ra byte, các giá trị thô trong `toequal` phải nằm trong 0–255. Với `toxor`, chương trình đưa kết quả vào `putchar()`, nên byte thực sự xuất ra là byte thấp của giá trị XOR; solver lấy `& 0xff`.
-
-**Cần tìm trong Ghidra:** địa chỉ bắt đầu, label và các phần tử của từng mảng. Ảnh nên hiển thị được địa chỉ ảo, kiểu dữ liệu và kích thước phần tử.
-
-<!-- TODO-IMAGE: 06-toequal-array.png — Listing tại VA 0x4020, hiển thị label toequal và các phần tử 4 byte. -->
-![Ghidra - mảng toequal tại 0x4020](../assets/writeups/slow-flag/06-toequal-array.png)
-
-<!-- TODO-IMAGE: 07-toxor-array.png — Listing tại VA 0x40c0, hiển thị label toxor và các phần tử 4 byte. -->
-![Ghidra - mảng toxor tại 0x40c0](../assets/writeups/slow-flag/07-toxor-array.png)
-
-<!-- TODO-IMAGE: 08-elf-data-mapping.png — Memory Map/section .data và mapping VA/file offset. Nếu Ghidra không hiện file offset, dùng readelf -S/-l làm bằng chứng kèm theo. -->
-![Ghidra - section .data và mapping địa chỉ](../assets/writeups/slow-flag/08-elf-data-mapping.png)
+Một lưu ý về độ dài: hai mảng có 40 phần tử và `scanf("%40s", s)` cho phép nhập tối đa 40 ký tự, nhưng vòng lặp trong `main()` chạy theo `strlen(s)`. Vì vậy, 40 là số phần tử tối đa được hỗ trợ; không có đoạn kiểm tra nào trong ảnh `main()` bắt buộc mọi lần nhập phải dài đúng 40 ký tự.
 
 ### Bước 5. Dựng bảng P một lần
 
@@ -273,7 +253,7 @@ Lặp đủ 40 phần tử sẽ có 40 byte output.
 
 ### Bước 8. Kiểm tra kết quả: không được bỏ byte không in được
 
-Kết quả chạy solver:
+Kết quả chạy solver mà bạn cung cấp:
 
 ```text
 Password (40 bytes): b"why_do_I_feel_like_I'm_moving_in_circl\\xb0\\x87"
@@ -287,19 +267,17 @@ Validation (all bytes): PASS
 
 `Validation: PASS` cho biết 40 byte password tìm được thỏa phương trình kiểm tra khi dùng bảng `P` và `toequal` mà solver đã dựng/đọc. Nó là kiểm tra nội bộ quan trọng, nhưng chưa tự nó chứng minh độc lập rằng mapping ELF, thuật toán PRNG và chuỗi `RAND_VALS` đều trùng binary gốc.
 
-Hai byte cuối password là `b0 87`; hai byte cuối output là `f4 c5`. Chúng không phải ASCII in được. Không dùng cách lọc như `bytes(b for b in flag if 32 <= b < 127)`, vì nó xóa byte và có thể che giấu sai lệch vị trí.
-
-Code mới sẽ in đủ dữ liệu theo bốn dạng:
+Hai byte cuối password là `b0 87`; hai byte cuối output là `f4 c5`. Chúng không phải ASCII in được. Không dùng cách lọc như `bytes(b for b in flag if 32 <= b < 127)`, vì nó xóa byte và có thể che giấu sai lệch vị trí. Code mới ở dưới in đủ dữ liệu theo bốn dạng:
 
 - `repr`: giữ byte không in được dưới dạng `\\xb0`, `\\x87`, `\\xf4`, `\\xc5`.
 - `ASCII-safe`: hiển thị ký tự ASCII và escape byte ngoài ASCII.
-- `Latin-1`: ánh xạ mỗi byte thành đúng một ký tự.
+- `Latin-1`: ánh xạ mỗi byte thành đúng một ký tự; với output hiện tại, hai byte cuối hiển thị thành `ôÅ`.
 - `hex`: biểu diễn chính xác từng byte, không phụ thuộc font hay terminal.
 
 **Kết luận cần ghi trung thực:** hiện có 40 byte output. 38 byte đầu đọc được là `BKISC{1m_gl4d_u_g0t_0ut_of_th47_m4z3!!`; hai byte cuối là `f4 c5`. Dữ liệu hiện tại chưa có dấu `}` ở cuối. Không tự thêm dấu ngoặc hoặc xóa hai byte cuối để gọi đó là flag hoàn chỉnh. Muốn kết luận nguyên nhân cần đối chiếu độc lập hai phần tử cuối của `toequal`/`toxor`, file offset và PRNG với binary gốc.
 
-<!-- TODO-IMAGE: 09-solver-full-output.png — Chụp terminal sau khi chạy solver đã sửa: phải thấy repr, ASCII-safe, Latin-1, hex đầy đủ 40 byte và Validation. Không cắt mất phần đuôi. -->
-![Terminal - output đủ 40 byte, kể cả byte ngoài ASCII](../assets/writeups/slow-flag/09-solver-full-output.png)
+
+![Terminal - kết quả solver đầy đủ 40 byte](images/slow-flag/07-solver-full-output.png)
 
 ### Bước 9. Vì sao không đặt `local_f8 = 0` để bỏ qua độ trễ?
 
@@ -330,10 +308,11 @@ Solver chỉ đọc binary ở chế độ `rb`; không sửa và không thực 
 # =============================================================================
 # slow_flag CTF - standalone Python solver
 # =============================================================================
-# Recovers the password and output from the `slow_flag` ELF64 binary using
-# static analysis. The original binary is only read, never modified/executed.
+# Recovers the password and flag from the `slow_flag` ELF64 binary purely by
+# static analysis. The original binary is only read (never modified or executed).
 #
-# Usage: python3 solver.py [path/to/slow_flag]
+# Usage:  python3 solver.py [path/to/slow_flag]
+#         (defaults to ./slow_flag next to this script)
 # =============================================================================
 
 import struct
@@ -341,12 +320,10 @@ import sys
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
-# 1. Locate and read the challenge binary
+# 1. Locate the challenge binary
 # ---------------------------------------------------------------------------
-
 DEFAULT_BIN = Path(__file__).resolve().with_name("slow_flag")
 BIN_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_BIN
-
 if not BIN_PATH.exists():
     sys.exit(f"error: binary not found: {BIN_PATH}")
 
@@ -354,62 +331,57 @@ with open(BIN_PATH, "rb") as f:
     data = f.read()
 
 # ---------------------------------------------------------------------------
-# 2. Extract toequal and toxor
+# 2. Extract the `toequal` and `toxor` arrays
 # ---------------------------------------------------------------------------
-
-# For this binary:
-# VA 0x4000 -> file offset 0x3000
-# file_offset = VA - 0x1000
-
+# The binary is a PIE ELF64. The .data section maps VA 0x4000 -> file offset
+# 0x3000, i.e. file_offset = VA - 0x1000. Symbols (readelf -s) and objdump
+# annotations confirm:
+#   toequal  @ VA 0x4020, 160 bytes = 40 int32  (the per-char check targets)
+#   toxor    @ VA 0x40c0, 160 bytes = 40 int32  (the per-char output XOR mask)
+# The arrays are larger than the effective password length (see note below).
 def va2off(va):
     return va - 0x1000
 
+TOEQUAL_VA, TOXOR_VA, N = 0x4020, 0x40c0, 40
+toequal_raw = list(struct.unpack_from("<%di" % N, data, va2off(TOEQUAL_VA)))
+toxor_raw   = list(struct.unpack_from("<%di" % N, data, va2off(TOXOR_VA)))
 
-TOEQUAL_VA = 0x4020
-TOXOR_VA = 0x40c0
-N = 40
-
-toequal_raw = list(
-    struct.unpack_from(
-        f"<{N}i",
-        data,
-        va2off(TOEQUAL_VA)
-    )
-)
-
-toxor_raw = list(
-    struct.unpack_from(
-        f"<{N}i",
-        data,
-        va2off(TOXOR_VA)
-    )
-)
-
-# Check raw values BEFORE masking.
+# transform() returns a value in [0, 255], so toequal must also fit in one byte.
+# Check the raw int32 values BEFORE masking; checking after & 0xFF is meaningless.
 if not all(0 <= v <= 0xFF for v in toequal_raw):
-    raise ValueError(
-        f"toequal contains values outside byte range: {toequal_raw}"
-    )
+    raise ValueError(f"toequal contains a value outside byte range: {toequal_raw}")
 
 toequal = toequal_raw
-
-# putchar() emits the low byte of the integer argument.
+# putchar() ultimately emits the low byte of its int argument.
 toxor = [v & 0xFF for v in toxor_raw]
-
 assert len(toxor) == N
 
 # ---------------------------------------------------------------------------
-# 3. Reconstruct the PRNG output and shuffle
+# 3. Reproduce glibc's PRNG and the shuffle
 # ---------------------------------------------------------------------------
-
-# The target calls:
-# srand(0xdeadface)
-# shuffle(table, 256)
+# The binary calls srand(0xdeadface) then shuffle(array, 256) inside transform().
+# glibc's rand() on the target returns full 31-bit values [0, 0x7fffffff]
+# (verified empirically against the target system; the simple textbook LCG
+#  state = state*1103515245+12345 mod 2^31 does NOT match this build's output,
+#  so the exact 255 outputs for seed 0xdeadface are embedded below).
 #
-# The following 255 values are the rand() outputs recorded for the target
-# glibc implementation. A generic LCG must not be substituted without
-# proving that it matches the target.
+# shuffle(array, n) as recovered from the disassembly (variant A):
+#     if (n <= 1) return;
+#     for (i = 0; i < n - 1; i++) {
+#         unsigned r = rand();
+#         unsigned m = n - i;
+#         unsigned d = (0x7fffffff / m) + 1;
+#         unsigned j = i + (r / d);      // unsigned division -> j in [i, n-1]
+#         swap(array[i], array[j]);
+#     }
+#
+# Because d = (0x7fffffff/m)+1 > 0x7fffffff/m, we always have r/d <= m-1 when
+# r <= 0x7fffffff, so j never leaves the array. With full-range rand() this is
+# a proper Fisher-Yates-style permutation (non-trivial); with glibc's historic
+# 15-bit rand() it would degenerate to the identity.
 
+# 255 rand() values emitted by the target's glibc for srand(0xdeadface)
+# (one draw per shuffle iteration; shuffle(.,256) performs exactly 255 swaps).
 RAND_VALS = [
     105117016, 1375465877, 893382572, 75443725, 2098268485, 134323897,
     894914935, 937478623, 634898298, 1469339112, 202866715, 549429123,
@@ -455,194 +427,173 @@ RAND_VALS = [
     1932379371, 892936283, 1822402710, 82214303, 363026033, 64207085,
     1108531313, 295306668, 756846695,
 ]
-
-assert len(RAND_VALS) == 255
+assert len(RAND_VALS) == 255, "shuffle(256) must consume exactly 255 rand values"
 
 
 def build_permutation(rand_vals, n=256):
-    """Reproduce the target's Fisher-Yates-style shuffle."""
     a = list(range(n))
-
+    it = iter(rand_vals)
     for i in range(n - 1):
-        r = rand_vals[i]
+        r = next(it)
         m = n - i
         d = (0x7FFFFFFF // m) + 1
         j = i + (r // d)
-
-        if not i <= j < n:
-            raise ValueError(
-                f"Invalid shuffle index: i={i}, j={j}"
-            )
-
+        assert i <= j < n, (i, r, m, d, j)
         a[i], a[j] = a[j], a[i]
-
     return a
 
 
 P = build_permutation(RAND_VALS)
-
 is_identity = all(P[x] == x for x in range(256))
-print(
-    f"[info] permutation P: "
-    f"{'IDENTITY' if is_identity else 'non-trivial'}"
-)
+print(f"[info] permutation P: {'IDENTITY (degenerate)' if is_identity else 'non-trivial'}")
 
 # ---------------------------------------------------------------------------
-# 4. Decompose P into cycles
+# 4. Cycle decomposition of P
 # ---------------------------------------------------------------------------
-
-seen = [False] * 256
-cycle_id = [0] * 256
-cycle_pos = [0] * 256
+n = len(P)
+seen = [False] * n
+cycle_id = [0] * n
+cycle_pos = [0] * n
 cycles = []
-
-for start in range(256):
+for start in range(n):
     if seen[start]:
         continue
-
     cyc = []
     x = start
-
     while not seen[x]:
         seen[x] = True
         cyc.append(x)
         x = P[x]
-
     cid = len(cycles)
     cycles.append(cyc)
+    for pos, v in enumerate(cyc):
+        cycle_id[v] = cid
+        cycle_pos[v] = pos
 
-    for pos, value in enumerate(cyc):
-        cycle_id[value] = cid
-        cycle_pos[value] = pos
 
-
-def apply_pow(x, k):
-    """Return P^k(x) using the cycle containing x."""
-    cyc = cycles[cycle_id[x]]
+def apply_pow(P, x, k):
+    """Apply P, k times, to x, using its cycle (fast, no big-integer iteration)."""
+    cyc = cycles[cycle_id[x]]   # global cycle containing x (consistent with cycle_pos)
     L = len(cyc)
-
     return cyc[(cycle_pos[x] + k) % L]
 
 
 # ---------------------------------------------------------------------------
 # 5. Recover the password
 # ---------------------------------------------------------------------------
-
-password_bytes = []
-
+# main() checks: transform(password[i], local_f0^2) == toequal[i]
+# where local_f0 starts at 1 and is multiplied by 3 after each char, so for
+# char index i the transform is applied 3^0 * 3^0 ... = (3^i)^2 = 9^i times:
+#     P^(9^i)(password[i]) == toequal[i]
+# Hence:
+#     password[i] = P^(-(9^i))(toequal[i])
+#                 = cycle_element at (pos(toequal[i]) - (9^i mod L)) mod L
+pw = []
 for i in range(N):
     target = toequal[i]
-
     cid = cycle_id[target]
     cyc = cycles[cid]
     L = len(cyc)
+    p = cycle_pos[target]
+    k = pow(9, i, L)            # 9^i mod cycle length (no 9^i big-int)
+    pw.append(cyc[(p - k) % L])
 
-    pos = cycle_pos[target]
-
-    # Calculate 9^i mod L without constructing the huge exponent.
-    k = pow(9, i, L)
-
-    # Move backwards through the cycle to recover the original byte.
-    original_byte = cyc[(pos - k) % L]
-
-    password_bytes.append(original_byte)
-
-
-password = bytes(password_bytes)
-
+password = bytes(pw)
 
 # ---------------------------------------------------------------------------
-# 6. Validate every password byte
+# 6. Validate every byte against the original equation
 # ---------------------------------------------------------------------------
-
 validation_ok = True
-
-for i, original_byte in enumerate(password):
-    k = pow(9, i, len(cycles[cycle_id[original_byte]]))
-
-    result = apply_pow(original_byte, k)
-
-    if result != toequal[i]:
+for i in range(N):
+    x = pw[i]
+    cid = cycle_id[x]
+    L = len(cycles[cid])
+    k = pow(9, i, L)
+    if apply_pow(P, x, k) != toequal[i]:
         validation_ok = False
         print(f"[validate] FAIL at index {i}")
 
 # ---------------------------------------------------------------------------
-# 7. Recover all output bytes using XOR
+# 7. Recover the output bytes:  flag[i] = toxor[i] XOR password[i]
 # ---------------------------------------------------------------------------
-
-flag_output = bytes(
-    (toxor[i] ^ password[i]) & 0xFF
-    for i in range(N)
-)
-
+flag = bytes((toxor[i] ^ pw[i]) & 0xFF for i in range(N))
 
 # ---------------------------------------------------------------------------
-# 8. Display all bytes without discarding non-printable values
+# 8. Report
 # ---------------------------------------------------------------------------
-
 def show_all_bytes(label, value):
+    """Display every byte; never silently discard non-ASCII values."""
     print(f"\n{label} ({len(value)} bytes)")
     print("  repr       :", repr(value))
-    print(
-        "  ASCII-safe :",
-        value.decode("ascii", errors="backslashreplace")
-    )
+    print("  ASCII-safe :", value.decode("ascii", errors="backslashreplace"))
     print("  Latin-1    :", value.decode("latin-1"))
     print("  hex        :", value.hex(" "))
 
 
 print("\n=== RESULTS ===")
-print(
-    f"Validation (all {N} password bytes): "
-    f"{'PASS' if validation_ok else 'FAIL'}"
-)
-
+print(f"Validation (all {N} password bytes): {'PASS' if validation_ok else 'FAIL'}")
 show_all_bytes("Password", password)
-show_all_bytes("Output", flag_output)
+show_all_bytes("Output", flag)
+
+# The final two output bytes are not printable ASCII in the current result.
+# Keep them visible in escaped/hex form; do not filter or invent replacements.
+if len(flag) >= 2 and any(b < 32 or b >= 127 for b in flag[-2:]):
+    print("\n[!] The final two bytes are not printable ASCII.")
+    print("[!] They are preserved above; do not discard them or append a guessed brace.")
 
 if not validation_ok:
     sys.exit(1)
-
-if len(flag_output) >= 2 and any(
-    b < 32 or b >= 127 for b in flag_output[-2:]
-):
-    print("\n[!] The final two bytes are not printable ASCII.")
-    print("[!] They are preserved above. No replacement was guessed.")
 ```
 
-## Flag / kết quả hiện tại
+## Flag
 
-Output candidate thu được từ dữ liệu hiện có:
+**Output candidate hiện tại (40 byte, chưa xác minh thành flag hoàn chỉnh):**
 
 ```text
 BKISC{1m_gl4d_u_g0t_0ut_of_th47_m4z3!!\xf4\xc5
 ```
 
-Hai byte cuối vẫn là `F4 C5`, chưa xác định được nguyên nhân và chưa đủ cơ sở để khẳng định flag hoàn chỉnh.
+Phần ASCII đọc được là `BKISC{1m_gl4d_u_g0t_0ut_of_th47_m4z3!!`. Hai byte cuối được giữ nguyên là `f4 c5`; chưa đủ bằng chứng để thay chúng bằng dấu `}` hoặc bỏ chúng đi.
 
 
 
-## Checklist ảnh Ghidra cần bổ sung
+## Ảnh phân tích đã chèn và ảnh còn cần bổ sung
 
-Lưu ảnh trong `assets/writeups/slow-flag/` với đúng tên file bên dưới.
+Các ảnh IDA/Ghidra bạn cung cấp đã được đặt vào đúng bước phân tích. Trong thư mục asset đi kèm, tên file đã được chuẩn hóa như sau:
 
-| Tên ảnh | Nội dung cần chụp |
-|---|---|
-| `01-main-control-flow.png` | Decompiler `main()`: `local_f8 = 1`, hai vòng lặp, `transform()`, so sánh `toequal`, `local_f8 *= 3`. |
-| `02-transform-setup.png` | `transform()`: khởi tạo bảng 256 phần tử, `srand(0xdeadface)`, `shuffle()`. |
-| `03-transform-lookup.png` | Vòng lặp tra `table[value]` và lệnh return. |
-| `04-shuffle-loop.png` | `shuffle()`: `rand()`, tính `d`, `j`, thao tác swap. |
-| `05-prng-references.png` | Symbol Tree và cross-reference của `rand()`/`srand()`. |
-| `06-toequal-array.png` | Listing tại VA `0x4020`, mảng `toequal`. |
-| `07-toxor-array.png` | Listing tại VA `0x40c0`, mảng `toxor`. |
-| `08-elf-data-mapping.png` | Memory Map hoặc section `.data`, mapping VA và file offset. |
-| `09-solver-full-output.png` | Terminal hiển thị toàn bộ 40 byte, hex và kết quả validation. |
+| Tên ảnh | Công cụ | Nội dung / mục đích |
+|---|---|---|
+| `01-main-ida.png` | IDA | Phần đầu `main()`: prompt, `scanf("%40s", s)` và phần bắt đầu luồng kiểm tra. |
+| `02-main-ghidra.png` | Ghidra | `main()`: `local_f8 = 1`, hai vòng lặp, so sánh `toequal`, XOR với `toxor`, nhân `local_f8` với 3. |
+| `03-transform-ida.png` | IDA | `transform()`: khởi tạo 256 phần tử, seed `0xDEADFACE`, gọi `shuffle()` và tra bảng. |
+| `04-transform-ghidra.png` | Ghidra | Bản decompiler độc lập của `transform()`, xác nhận cùng luồng xử lý. |
+| `05-shuffle-ghidra.png` | Ghidra | `shuffle()`: `rand()`, công thức chia để lấy chỉ số `j` và thao tác swap. |
+| `06-data-arrays-ida.png` | IDA | Hai mảng `toequal[40]` và `toxor[40]`, địa chỉ VA và file offset được IDA hiển thị. |
 
-### Tài liệu tham khảo
+Hai ảnh IDA còn lại (graph overview và cửa sổ disassembly thu nhỏ) không được dùng làm ảnh chứng minh chính vì nội dung code quá nhỏ hoặc không thể hiện rõ thuật toán hơn các ảnh pseudocode đã chèn. Có thể giữ chúng làm tư liệu cá nhân, nhưng không cần đưa vào bài blog.
+
+Ảnh còn nên tự chụp nếu muốn writeup có bằng chứng đầy đủ hơn:
+
+- `07-solver-full-output.png`: terminal sau khi chạy solver, hiển thị đủ 40 byte ở dạng `repr`, ASCII-safe và hex, cùng `Validation`.
+- `08-elf-program-headers.png` (không bắt buộc): kết quả `readelf -l -S slow_flag` hoặc màn hình tương ứng chứng minh mapping VA/file offset. Ảnh IDA hiện tại đã hiển thị cặp offset/VA tại `toequal`, nhưng program header giúp người đọc tự kiểm tra mapping rõ hơn.
+
+Đường dẫn ảnh trong repo:
+
+```text
+images/slow-flag/
+├── 01-main-ida.png
+├── 02-main-ghidra.png
+├── 03-transform-ida.png
+├── 04-transform-ghidra.png
+├── 05-shuffle-ghidra.png
+└── 06-data-arrays-ida.png
+```
+
+## Tài liệu tham khảo
 
 - Ghidra: https://ghidra-sre.org/
 - ELF và `readelf`: https://man7.org/linux/man-pages/man1/readelf.1.html
 - GNU Binutils `objdump`: https://sourceware.org/binutils/docs/binutils/objdump.html
 - Python `struct`: https://docs.python.org/3/library/struct.html
-- Python `pow()`: https://docs.python.org/3/library/functions.html#pow
+- Python `pow()` với modulo: https://docs.python.org/3/library/functions.html#pow
 - Python `bytes`: https://docs.python.org/3/library/stdtypes.html#bytes

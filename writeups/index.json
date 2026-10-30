@@ -107,7 +107,7 @@
       "modular-exponentiation",
       "xor"
     ],
-    "summary": "Phân tích ELF tĩnh, tái tạo phép hoán vị byte từ PRNG có seed cố định và đảo hàng tỷ lần biến đổi bằng phân rã chu kỳ."
+    "summary": "Dùng IDA và Ghidra phân tích main, transform, shuffle; tái tạo phép hoán vị 256 byte và đảo số lần biến đổi 9^i bằng phân rã chu kỳ."
   },
   {
     "slug": "please-do-reverse",
