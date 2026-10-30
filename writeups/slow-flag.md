@@ -38,9 +38,9 @@ Trong ảnh IDA, phần đầu `main()` cho thấy chương trình đọc passwo
 
 Hai ảnh dưới đây bổ trợ nhau: IDA thể hiện cả lời gọi nhập liệu và phần kiểm tra; Ghidra làm rõ các vòng lặp và thao tác sau mỗi ký tự.
 
-![IDA - main(): đọc password và luồng kiểm tra](images/slow-flag/01-main-ida.png)
+![IDA - main(): đọc password và luồng kiểm tra](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/slow-flag/01-main-ida.png?raw=true)
 
-![Ghidra - main(): các vòng lặp kiểm tra password](images/slow-flag/02-main-ghidra.png)
+![Ghidra - main(): các vòng lặp kiểm tra password](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/slow-flag/02-main-ghidra.png?raw=true)
 
 Phần pseudocode quan trọng có thể viết gọn lại như sau (tên biến được giữ gần với tên decompiler):
 
@@ -99,9 +99,9 @@ Cả IDA và Ghidra đều cho thấy cùng một cấu trúc:
 5. Lấy giá trị đầu vào làm chỉ số tra bảng; lặp lại thao tác tra bảng `param_2` lần.
 6. Trả về giá trị cuối cùng.
 
-![IDA - transform(): khởi tạo bảng, seed, shuffle và tra cứu](images/slow-flag/03-transform-ida.png)
+![IDA - transform(): khởi tạo bảng, seed, shuffle và tra cứu](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/slow-flag/03-transform-ida.png?raw=true)
 
-![Ghidra - transform(): cùng luồng xử lý trong decompiler](images/slow-flag/04-transform-ghidra.png)
+![Ghidra - transform(): cùng luồng xử lý trong decompiler](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/slow-flag/04-transform-ghidra.png?raw=true)
 
 Có thể biểu diễn phần cốt lõi bằng Python như sau:
 
@@ -135,7 +135,7 @@ Ta đã biết `transform()` tạo bảng bằng cách gọi `shuffle()`. Nếu 
 - Tính chỉ số đổi chỗ từ `local_18`, giá trị `rand()` và kích thước phần mảng còn lại.
 - Hoán đổi hai phần tử ở vị trí `local_18` và `lVar3`.
 
-![Ghidra - shuffle(): rand(), tính chỉ số và hoán đổi phần tử](images/slow-flag/05-shuffle-ghidra.png)
+![Ghidra - shuffle(): rand(), tính chỉ số và hoán đổi phần tử](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/slow-flag/05-shuffle-ghidra.png?raw=true)
 
 Đặt `n = param_2`, `i = local_18`, `r = rand()`. Công thức decompiler thể hiện là:
 
@@ -167,7 +167,7 @@ Sau khi hiểu thuật toán, ta cần lấy dữ liệu mà chương trình dù
 - `toxor[40]` tại virtual address `0x40c0`.
 - Mỗi phần tử được định nghĩa là `DWORD`, tức 4 byte; mỗi mảng có 40 phần tử, tổng cộng 160 byte.
 
-![IDA - hai mảng toequal[40] và toxor[40] trong .data](images/slow-flag/06-data-arrays-ida.png)
+![IDA - hai mảng toequal[40] và toxor[40] trong .data](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/slow-flag/06-data-arrays-ida.png?raw=true)
 
 Trong ảnh, thanh trạng thái của IDA tại phần tử đầu `toequal` hiển thị file offset `0x3020` tương ứng virtual address `0x4020`. Với mapping của `.data` trong binary này, quan hệ dùng trong solver là:
 

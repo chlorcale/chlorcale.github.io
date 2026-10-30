@@ -6,7 +6,7 @@ const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
 let feedmeCleanup = null;
-const ASSET_VERSION = '20261030-19';
+const ASSET_VERSION = '20261030-20';
 let markedPromise;
 let currentTrack = 0;
 const PLAYLIST = [
@@ -543,6 +543,7 @@ function cover(slug,category,done=true){
 function parseFront(md){const m=md.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);const data={};if(m)m[1].split('\n').forEach(line=>{const i=line.indexOf(':');if(i>0)data[line.slice(0,i).trim()]=line.slice(i+1).trim();});return {data,body:m?md.slice(m[0].length):md};}
 function basicMarkdown(md){
   let source=esc(md).replace(/```([\w-]*)\n([\s\S]*?)```/g,(_,lang,code)=>`\n<pre><code class="language-${lang||'text'}">${code.trimEnd()}</code></pre>\n`);
+  source=source.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g,(_,alt,url,title='')=>`<img src="${url}" alt="${alt}"${title?` title="${title}"`:''}>`);
   source=source.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>');
   source=source.replace(/^\|(.+)\|\n\|[-| :]+\|\n((?:\|.*\|\n?)*)/gm,(_,head,rows)=>{const cells=s=>s.split('|').filter(Boolean).map(x=>`<td>${x.trim()}</td>`).join('');return `<table><tbody><tr>${cells(head)}</tr>${rows.trim().split('\n').map(row=>`<tr>${cells(row)}</tr>`).join('')}</tbody></table>`;});
   source=source.replace(/^> (.+)$/gm,'<blockquote><p>$1</p></blockquote>').replace(/^- (.+)$/gm,'<li>$1</li>');
