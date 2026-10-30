@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap&subset=vietnamese">
-<link rel="stylesheet" href="style.css?v=20261029-2">
+<link rel="stylesheet" href="style.css?v=20261030-5">
 </head>
 <body>
 <header class="top">
@@ -32,7 +32,7 @@
 </div>
 <div id="melanie-sprite" class="melanie-sprite" role="img" aria-label="Melanie, sprite pixel chuyển động">
   <span class="sprite-name">Melanie</span>
-  <img class="melanie-art" src="assets/melanie-hcmut.png" data-still="assets/melanie-hcmut.png" data-animation="assets/melanie-hcmut.webp" alt="Melanie sprite">
+  <img class="melanie-art" src="assets/melanie-hcmut.png" data-still="assets/melanie-hcmut.png" alt="Melanie sprite">
 </div>
 <main id="app"><p class="muted">Đang tải…</p></main>
 <footer class="site-footer">
@@ -49,23 +49,33 @@
   <audio id="dio-sfx" preload="auto" src="assets/Za%20Warudo%20Time%20stop%20sound%20effect%20%2B%20DIO%20HTFT%20voice%20line.mp3"></audio>
 </aside>
 <div id="bullsheet-overlay" class="bullsheet-overlay" aria-hidden="true">
+  <video id="jupiter-video" class="jupiter-video" src="assets/Jupiter.mp4" preload="none" playsinline></video>
   <div class="bullsheet-flash" aria-hidden="true"></div>
   <div class="bullsheet-stage" aria-hidden="true">
-    <div class="dio-entrance"><div class="sprite-frame dio-frame" data-anchor="bottom">
-      <img class="dio-anim" src="assets/dio_and_theworld/dio-point-hold.png" alt="">
+    <div class="dio-entrance"><div class="sprite-frame dio-frame" data-anchor="bottom" data-pose="0">
+      <img src="assets/dio_and_theworld/dio-seq-0.png" alt="">
+      <img src="assets/dio_and_theworld/dio-seq-1.png" alt="">
+      <img src="assets/dio_and_theworld/dio-seq-2.png" alt="">
+      <img src="assets/dio_and_theworld/dio-seq-3.png" alt="">
+      <img src="assets/dio_and_theworld/dio-seq-4.png" alt="">
+      <img src="assets/dio_and_theworld/dio-seq-5.png" alt="">
+      <img src="assets/dio_and_theworld/dio-seq-6.png" alt="">
+      <img src="assets/dio_and_theworld/dio-seq-7.png" alt="">
+      <img src="assets/dio_and_theworld/dio-seq-8.png" alt="">
     </div></div>
     <div class="dio-caption" aria-hidden="true">ZA WARUDO!</div>
     <div class="world-entrance"><div class="sprite-frame world-frame" data-anchor="center" data-pose="0">
-      <img src="assets/dio_and_theworld/the-world-pose-0.png" alt="">
-      <img src="assets/dio_and_theworld/the-world-pose-1.png" alt="">
-      <img src="assets/dio_and_theworld/the-world-pose-2.png" alt="">
-      <img src="assets/dio_and_theworld/the-world-pose-3.png" alt="">
+      <img src="assets/dio_and_theworld/the-world-pose-0.svg" alt="">
+      <img src="assets/dio_and_theworld/the-world-pose-1.svg" alt="">
+      <img src="assets/dio_and_theworld/the-world-pose-2.svg" alt="">
+      <img src="assets/dio_and_theworld/the-world-pose-3.svg" alt="">
     </div></div>
     <div class="bull-crack"></div>
   </div>
+  <canvas id="jupiter-ruins" class="jupiter-ruins" aria-hidden="true"></canvas>
   <button id="bullsheet-reset" class="bullsheet-reset" type="button">RESET EFFECT · ESC</button>
 </div>
-<script src="app.js?v=20261029-3"></script>
+<script src="app.js?v=20261030-7"></script>
 <script src="rain.js?v=20261029-2"></script>
 </body>
 </html>

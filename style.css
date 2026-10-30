@@ -197,6 +197,15 @@ body.article-open .melanie-corner{display:none}
 .dio-frame .dio-anim{opacity:1}
 .dio-frame.holding .dio-anim{opacity:0}
 .dio-frame.holding .dio-hold{opacity:1}
+.dio-frame[data-pose="0"] img:nth-child(1),
+.dio-frame[data-pose="1"] img:nth-child(2),
+.dio-frame[data-pose="2"] img:nth-child(3),
+.dio-frame[data-pose="3"] img:nth-child(4),
+.dio-frame[data-pose="4"] img:nth-child(5),
+.dio-frame[data-pose="5"] img:nth-child(6),
+.dio-frame[data-pose="6"] img:nth-child(7),
+.dio-frame[data-pose="7"] img:nth-child(8),
+.dio-frame[data-pose="8"] img:nth-child(9){opacity:1}
 .world-frame[data-pose="0"] img:nth-child(1),
 .world-frame[data-pose="1"] img:nth-child(2),
 .world-frame[data-pose="2"] img:nth-child(3),
@@ -207,3 +216,31 @@ canvas.ambient-rain{position:fixed;left:0;top:0;right:auto;bottom:auto;z-index:1
 
 /* Hiệu ứng "ngừng thời gian" chỉ đổi màu, không rung trang */
 @keyframes site-stop-glitch{0%,100%{filter:grayscale(1) contrast(1.12)}50%{filter:grayscale(1) contrast(1.4)}}
+body.melanie-frozen .melanie-sprite,
+body.melanie-frozen .melanie-eyes{animation-play-state:paused!important}
+.jupiter-video{position:absolute;z-index:1;inset:0;width:100%;height:100%;object-fit:cover;background:#07080b;opacity:0;transition:opacity .2s}
+.bullsheet-overlay.jupiter-mode .jupiter-video{opacity:1}
+.bullsheet-overlay.jupiter-mode .bullsheet-stage{display:none}
+.bullsheet-overlay.jupiter-audio-only .jupiter-video{opacity:0}
+#jupiter-ruins{position:absolute;z-index:6;inset:0;display:none;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
+.bullsheet-overlay.jupiter-audio-only #jupiter-ruins{display:block}
+body.jupiter-ruined>.top,body.jupiter-ruined>#app,body.jupiter-ruined>.site-footer,body.jupiter-ruined>.music-dock,body.jupiter-ruined>.ambient-rain{filter:grayscale(.43) sepia(.2) brightness(.7) contrast(1.18)}
+body.jupiter-ruined>.top{transform:rotate(-2.1deg) translate(-10px,10px);border-color:#a94d38;box-shadow:0 8px 0 #17191c,0 10px 0 #7c332b}
+body.jupiter-ruined .top nav a:nth-child(odd){transform:rotate(-6deg) translateY(4px);clip-path:polygon(0 8%,12% 0,94% 5%,100% 20%,91% 100%,5% 90%)}
+body.jupiter-ruined .top nav a:nth-child(even){transform:rotate(5deg) translateY(-3px);clip-path:polygon(8% 0,100% 8%,93% 100%,0 88%,4% 22%)}
+body.jupiter-ruined #app .hero{transform:rotate(1.45deg) translate(8px,10px);border-color:#a94d38;box-shadow:0 10px 0 #17191c}
+body.jupiter-ruined #app .tools{transform:rotate(-1.5deg) translate(-7px,8px)}
+body.jupiter-ruined #app .search-wrap{transform:rotate(2deg) translateX(-5px);border-color:#d26742;box-shadow:6px 7px 0 #211919;clip-path:polygon(0 5%,7% 0,100% 4%,96% 92%,88% 100%,2% 95%)}
+body.jupiter-ruined #app .filter{clip-path:polygon(0 8%,10% 0,100% 4%,96% 76%,86% 100%,4% 92%)}
+body.jupiter-ruined #app .filter:nth-child(odd){transform:rotate(-5deg) translate(-3px,4px)}
+body.jupiter-ruined #app .filter:nth-child(even){transform:rotate(4.2deg) translate(2px,-4px)}
+body.jupiter-ruined #app .card{position:relative;border-color:#a75a43;box-shadow:6px 7px 0 #16191d,10px 11px 0 #6e342d;transition:transform .8s steps(5,end)}
+body.jupiter-ruined #app .card:nth-child(odd){transform:rotate(-2.7deg) translate(-7px,7px);clip-path:polygon(0 9%,9% 0,34% 2%,39% 0,94% 2%,100% 12%,97% 32%,100% 42%,96% 88%,88% 100%,62% 97%,56% 100%,13% 96%,7% 100%,0 88%)}
+body.jupiter-ruined #app .card:nth-child(even){transform:rotate(2.5deg) translate(7px,-5px);clip-path:polygon(5% 0,29% 3%,38% 0,100% 8%,96% 34%,100% 45%,96% 93%,86% 100%,48% 97%,39% 100%,1% 92%,4% 65%,0 53%)}
+body.jupiter-ruined #app .card::after{content:"";position:absolute;z-index:4;inset:0;pointer-events:none;opacity:.62;background:linear-gradient(133deg,transparent 0 53%,#ffb06b 53.15% 53.3%,transparent 53.5%)}
+body.jupiter-ruined #app .card:nth-child(3n+1)::after{background:linear-gradient(151deg,transparent 0 37%,#ffb06b 37.15% 37.32%,transparent 37.52%),linear-gradient(62deg,transparent 0 73%,#b9523a 73.15% 73.3%,transparent 73.5%)}
+body.jupiter-ruined #app .card:nth-child(3n+2)::after{background:linear-gradient(126deg,transparent 0 61%,#ffb06b 61.15% 61.3%,transparent 61.5%)}
+body.jupiter-ruined #app .group:nth-child(even){transform:rotate(-.9deg) translateX(-8px)}
+body.jupiter-ruined #app .bullsheet-button{border-color:#ff7449;color:#ffc09b}
+@keyframes jupiter-ruin-hit{0%{transform:translate(0,0)}18%{transform:translate(-8px,3px) rotate(-.5deg)}38%{transform:translate(5px,-2px) rotate(.3deg)}62%{transform:translate(-3px,1px)}100%{transform:translate(0,0)}}
+body.jupiter-ruined #app{animation:jupiter-ruin-hit .7s steps(4,end) 1}

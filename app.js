@@ -5,7 +5,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&
 const catName = c => CATS[c] || c;
 const state = { q: '', cat: 'all' };
 let DB = [];
-const ASSET_VERSION = '20261029-2';
+const ASSET_VERSION = '20261030-7';
 let markedPromise;
 let currentTrack = 0;
 const PLAYLIST = [
@@ -52,15 +52,19 @@ function initBullSheet() {
   if (!reset || !overlay) return;
   const audio = document.getElementById('site-track');
   const stopSfx = document.getElementById('dio-sfx');
+  const jupiter = document.getElementById('jupiter-video');
+  const ruins = document.getElementById('jupiter-ruins');
+  const ruinCtx = ruins?.getContext('2d');
   const dioFrame = overlay.querySelector('.dio-frame');
   const worldFrame = overlay.querySelector('.world-frame');
   if (!dioFrame || !worldFrame) { console.warn('[bullsheet] thiếu .dio-frame hoặc .world-frame trong index.html'); return; }
-  const dioAnim = dioFrame.querySelector('.dio-anim');
   const dioImgs = [...dioFrame.querySelectorAll('img')];
   const worldImgs = [...worldFrame.querySelectorAll('img')];
-  const dioSrc = dioAnim.getAttribute('src');
-  const T = { worldIn: 1760, worldFrame: 175, impact: 3300, end: 8200 };
-  let timers = [], runId = 0, running = false, musicWasPlaying = false, dioBlob = null, dioUrl = null;
+  const T = { dioFrame: 125, worldIn: 1000, worldFrame: 200, impact: 2400, end: 10000 };
+  let timers = [], runId = 0, running = false, musicWasPlaying = false;
+  let nextMode = 'dio';
+  let ruinRaf = 0, lastEmber = 0, embers = [], glassPaths = [], jupiterStartedAt = 0;
+  let fireAudioContext = null, fireMaster = null, fireNoiseSource = null, fireRumble = null, fireNoiseBuffer = null, fireCrackleTimer = 0;
   const later = (fn, ms) => timers.push(setTimeout(fn, ms));
   const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
   const num = (el, name) => Number(el.style.getPropertyValue(name)) || 0;
@@ -70,8 +74,6 @@ function initBullSheet() {
     const w = Math.max(...imgs.map(i => i.naturalWidth)), h = Math.max(...imgs.map(i => i.naturalHeight));
     if (!w || !h) return;
     frame.style.setProperty('--w', w); frame.style.setProperty('--h', h);
-    const sizes = [...new Set(imgs.map(i => `${i.naturalWidth}x${i.naturalHeight}`))];
-    if (sizes.length > 1) console.info('[bullsheet] các frame khác kích thước:', sizes.join(', '), '→ nên xuất cùng kích thước canvas');
   }
   function fit() {
     const small = innerWidth <= 700;
@@ -80,36 +82,213 @@ function initBullSheet() {
     if (ww) worldFrame.style.setProperty('--k', Math.min(innerWidth * (small ? .98 : .88), innerHeight * 1.3) / ww);
   }
 
-  // Nạp + giải mã sẵn mọi ảnh ngay khi trang tải để lúc bấm nút không phải chờ.
+  // Nạp + giải mã sẵn mọi frame cùng kích thước để cutscene đổi dáng mà không nhảy khung.
   const ready = (async () => {
     await Promise.all([...dioImgs, ...worldImgs].map(img => img.decode().catch(() => {})));
     measure(dioFrame, dioImgs); measure(worldFrame, worldImgs); fit();
-    try { const r = await fetch(dioSrc); if (r.ok) dioBlob = await r.blob(); } catch (_) { /* dùng cách dự phòng bên dưới */ }
   })();
-  addEventListener('resize', fit);
+  addEventListener('resize', () => { fit(); if (overlay.classList.contains('jupiter-audio-only')) sizeRuinCanvas(); });
 
-  // Webp động chỉ chạy lại từ frame 0 khi nạp nguồn mới → dùng blob URL (không tải lại mạng).
-  async function restartDio() {
-    if (dioBlob) {
-      const old = dioUrl; dioUrl = URL.createObjectURL(dioBlob); dioAnim.src = dioUrl;
-      if (old) URL.revokeObjectURL(old);
-    } else dioAnim.src = `${dioSrc}${dioSrc.includes('?') ? '&' : '?'}play=${Date.now()}`;
-    try { await dioAnim.decode(); } catch (_) { /* vẫn chạy tiếp */ }
+  function sizeRuinCanvas() {
+    if (!ruins) return;
+    ruins.width = Math.max(240, Math.ceil(innerWidth / 4));
+    ruins.height = Math.max(135, Math.ceil(innerHeight / 4));
+    buildGlassCracks(ruins.width, ruins.height);
+  }
+  function buildGlassCracks(w, h) {
+    glassPaths = [];
+    const impacts = [{ x: w * .5, y: h * .43, rays: 16 }, { x: w * .19, y: h * .31, rays: 7 }, { x: w * .82, y: h * .58, rays: 7 }, { x: w * .57, y: h * .84, rays: 5 }];
+    impacts.forEach(impact => {
+      for (let ray = 0; ray < impact.rays; ray++) {
+        const angle = Math.PI * 2 * ray / impact.rays + (Math.random() - .5) * .2;
+        const dx = Math.cos(angle), dy = Math.sin(angle), length = Math.hypot(w, h) * (.38 + Math.random() * .25);
+        let x = impact.x, y = impact.y, travelled = 0, points = [[x, y]];
+        while (travelled < length && x > -8 && x < w + 8 && y > -8 && y < h + 8) {
+          const step = 5 + Math.random() * 7;
+          x += dx * step + (Math.random() - .5) * 3; y += dy * step + (Math.random() - .5) * 3;
+          travelled += step; points.push([x, y]);
+        }
+        glassPaths.push({ points, weight: .72 + Math.random() * .52, opacity: .52 + Math.random() * .3 });
+        if (ray % 2 === 0 && points.length > 7) {
+          const start = points[Math.floor(points.length * (.36 + Math.random() * .25))];
+          const branchAngle = angle + (Math.random() < .5 ? -1 : 1) * (.45 + Math.random() * .55);
+          let bx = start[0], by = start[1], branch = [[bx, by]];
+          for (let j = 0; j < 7; j++) { bx += Math.cos(branchAngle) * 7 + (Math.random() - .5) * 3; by += Math.sin(branchAngle) * 7 + (Math.random() - .5) * 3; branch.push([bx, by]); }
+          glassPaths.push({ points: branch, weight: .48 + Math.random() * .35, opacity: .3 + Math.random() * .25 });
+        }
+      }
+    });
+  }
+  function drawGlassCracks(ctx) {
+    ctx.save(); ctx.lineJoin = 'miter'; ctx.lineCap = 'square';
+    for (const crack of glassPaths) {
+      const { points, weight, opacity } = crack;
+      for (let i = 0; i < points.length - 1; i++) {
+        const distance = i / Math.max(1, points.length - 1);
+        const taper = (1 - distance * .82) * (.78 + ((i * 17 + points.length * 13) % 7) * .055);
+        const [[x1, y1], [x2, y2]] = [points[i], points[i + 1]];
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+        ctx.strokeStyle = `rgba(8,12,18,${opacity * taper})`; ctx.lineWidth = 1.15 * weight * taper; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+        ctx.strokeStyle = `rgba(194,220,226,${opacity * .72 * taper})`; ctx.lineWidth = .42 * weight * taper; ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+  function armFireAudio() {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    try {
+      if (!fireAudioContext) fireAudioContext = new AudioContextClass();
+      fireAudioContext.resume().catch(() => {});
+      if (fireNoiseSource) return;
+      fireNoiseBuffer = fireAudioContext.createBuffer(1, fireAudioContext.sampleRate, fireAudioContext.sampleRate);
+      const samples = fireNoiseBuffer.getChannelData(0);
+      for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+      fireMaster = fireAudioContext.createGain(); fireMaster.gain.value = 0; fireMaster.connect(fireAudioContext.destination);
+      const lowpass = fireAudioContext.createBiquadFilter(); lowpass.type = 'lowpass'; lowpass.frequency.value = 720;
+      const noiseGain = fireAudioContext.createGain(); noiseGain.gain.value = .055;
+      fireNoiseSource = fireAudioContext.createBufferSource(); fireNoiseSource.buffer = fireNoiseBuffer; fireNoiseSource.loop = true;
+      fireNoiseSource.connect(lowpass); lowpass.connect(noiseGain); noiseGain.connect(fireMaster); fireNoiseSource.start();
+      fireRumble = fireAudioContext.createOscillator(); fireRumble.type = 'triangle'; fireRumble.frequency.value = 54;
+      const rumbleGain = fireAudioContext.createGain(); rumbleGain.gain.value = .035;
+      fireRumble.connect(rumbleGain); rumbleGain.connect(fireMaster); fireRumble.start();
+    } catch (_) { /* Web Audio không được hỗ trợ thì vẫn chạy hiệu ứng hình */ }
+  }
+  function scheduleFireCrackle() {
+    if (!fireAudioContext || !fireMaster || !overlay.classList.contains('jupiter-audio-only')) return;
+    const ctx = fireAudioContext, now = ctx.currentTime, pop = ctx.createBufferSource(), band = ctx.createBiquadFilter(), env = ctx.createGain();
+    pop.buffer = fireNoiseBuffer; band.type = 'bandpass'; band.frequency.value = 1100 + Math.random() * 3100; band.Q.value = .8 + Math.random() * 1.6;
+    env.gain.setValueAtTime(.0001, now); env.gain.exponentialRampToValueAtTime(.12 + Math.random() * .18, now + .009); env.gain.exponentialRampToValueAtTime(.0001, now + .075 + Math.random() * .1);
+    pop.connect(band); band.connect(env); env.connect(fireMaster); pop.start(now); pop.stop(now + .2);
+    fireCrackleTimer = setTimeout(scheduleFireCrackle, 80 + Math.random() * 260);
+  }
+  function igniteFireAudio() {
+    armFireAudio();
+    if (!fireAudioContext || !fireMaster) return;
+    fireAudioContext.resume().catch(() => {});
+    fireMaster.gain.cancelScheduledValues(fireAudioContext.currentTime);
+    fireMaster.gain.setTargetAtTime(.58, fireAudioContext.currentTime, .35);
+    clearTimeout(fireCrackleTimer); scheduleFireCrackle();
+  }
+  function intensifyFireAudio() {
+    if (fireAudioContext && fireMaster) fireMaster.gain.setTargetAtTime(.92, fireAudioContext.currentTime, .7);
+  }
+  function stopFireAudio() {
+    clearTimeout(fireCrackleTimer); fireCrackleTimer = 0;
+    if (fireAudioContext && fireMaster) { fireMaster.gain.cancelScheduledValues(fireAudioContext.currentTime); fireMaster.gain.setTargetAtTime(0, fireAudioContext.currentTime, .06); }
+    try { fireNoiseSource?.stop(); } catch (_) { /* đã dừng */ }
+    try { fireRumble?.stop(); } catch (_) { /* đã dừng */ }
+    fireNoiseSource = fireRumble = fireMaster = fireNoiseBuffer = null;
+    fireAudioContext?.suspend().catch(() => {});
+  }
+  function stopRuinAnimation() {
+    if (ruinRaf) cancelAnimationFrame(ruinRaf);
+    ruinRaf = 0; embers = []; glassPaths = [];
+    if (ruinCtx && ruins) ruinCtx.clearRect(0, 0, ruins.width, ruins.height);
+  }
+  function drawRuins(now) {
+    if (!overlay.classList.contains('jupiter-audio-only') || !ruinCtx || !ruins) { ruinRaf = 0; return; }
+    const ctx = ruinCtx, w = ruins.width, h = ruins.height, px = Math.max(1, Math.round(w / 320));
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(5, 8, 12, .13)'; ctx.fillRect(0, 0, w, h);
+
+    // Blocky smoke columns roll upward from the wreckage.
+    const sources = [.16, .5, .84];
+    sources.forEach((origin, s) => {
+      for (let puff = 0; puff < 5; puff++) {
+        const rise = ((now * .00004 + s * .27 + puff * .19) % .82);
+        const drift = Math.sin(now * .00045 + puff * 1.7 + s) * (3 + rise * 15);
+        const x = origin * w + drift, y = h - rise * h * 1.08;
+        const size = px * (3 + rise * 11), alpha = .025 + (1 - rise / .82) * .065;
+        ctx.fillStyle = `rgba(${puff % 3 ? '64,70,77' : '91,77,68'},${alpha})`;
+        ctx.fillRect(x, y, size * 1.8, size);
+        ctx.fillRect(x - size, y + size * .55, size * 1.25, size * 1.1);
+        ctx.fillRect(x + size, y + size * .65, size * 1.1, size * .9);
+      }
+    });
+
+    // Pixel flames surge above a broken dark skyline.
+    const flicker = now * .008;
+    for (let x = 0; x < w; x += px * 3) {
+      const wave = (Math.sin(x * .13 + flicker) + Math.sin(x * .047 - flicker * 1.6) + 2) / 4;
+      const flameH = h * (.055 + wave * .14 + Math.random() * .035);
+      for (let y = 0; y < flameH; y += px * 2) {
+        const heat = y / flameH;
+        ctx.fillStyle = heat < .16 ? '#ffe36b' : heat < .42 ? '#ff982f' : heat < .76 ? '#eb4821' : '#812b25';
+        ctx.fillRect(x + (Math.random() < .14 ? px : 0), h - y, px * 2, px * 2);
+      }
+    }
+    ctx.fillStyle = 'rgba(15,19,23,.94)';
+    for (let x = 0; x < w; x += px * 8) {
+      const height = px * (5 + ((Math.sin(x * .09) + 1) * 8));
+      ctx.fillRect(x, h - height, px * (5 + (x % 7)), height);
+    }
+
+    if (now - lastEmber > 55) {
+      lastEmber = now;
+      for (let i = 0; i < 4; i++) embers.push({ x: Math.random() * w, y: h * (.55 + Math.random() * .42), vx: (Math.random() - .5) * 1.5, vy: -(1 + Math.random() * 2.8), life: 35 + Math.random() * 45 });
+    }
+    embers = embers.filter(p => p.life > 0);
+    embers.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; ctx.fillStyle = p.life % 3 ? '#ffc14b' : '#ff542c'; ctx.fillRect(p.x, p.y, px * 2, px * 2); });
+    drawGlassCracks(ctx);
+    ruinRaf = requestAnimationFrame(drawRuins);
+  }
+  function startRuinAnimation() {
+    if (!ruins) return;
+    sizeRuinCanvas(); lastEmber = 0; embers = [];
+    if (!ruinRaf) ruinRaf = requestAnimationFrame(drawRuins);
+  }
+  if (jupiter) {
+    jupiter.addEventListener('playing', () => {
+      if (overlay.classList.contains('jupiter-mode') && !jupiterStartedAt) jupiterStartedAt = performance.now();
+    });
+    jupiter.addEventListener('timeupdate', () => {
+      if (!overlay.classList.contains('jupiter-mode')) return;
+      if (jupiter.currentTime >= 25 && !overlay.classList.contains('jupiter-audio-only')) {
+        overlay.classList.add('jupiter-audio-only');
+        document.body.classList.add('jupiter-ruined');
+        startRuinAnimation();
+        igniteFireAudio();
+      }
+    });
+    jupiter.addEventListener('ended', () => {
+      if (!overlay.classList.contains('jupiter-mode')) { resetScene(); return; }
+      const elapsed = jupiterStartedAt ? performance.now() - jupiterStartedAt : jupiter.currentTime * 1000;
+      intensifyFireAudio();
+      later(resetScene, Math.max(0, 40000 - elapsed));
+    });
   }
 
-  async function start() {
+  async function start(mode = 'dio') {
     if (running) return;
     running = true; const id = ++runId;
     // Âm thanh phải bắt đầu ngay trong lượt bấm (chính sách autoplay của trình duyệt).
     musicWasPlaying = !audio.paused; if (musicWasPlaying) audio.pause();
-    stopSfx.currentTime = 0; stopSfx.play().catch(() => {});
-    await ready; await restartDio();
-    if (id !== runId) return;                       // đã reset trong lúc chờ
     clearTimers();
-    dioFrame.classList.remove('holding'); worldFrame.dataset.pose = '0';
+    if (mode === 'jupiter' && jupiter) {
+      overlay.classList.remove('active', 'impact', 'world-arrived', 'jupiter-audio-only');
+      void overlay.offsetWidth;
+      overlay.classList.add('active', 'jupiter-mode');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('bullsheet-active');
+      slowMelanieForTimeStop();
+      armFireAudio();
+      jupiterStartedAt = 0;
+      try { jupiter.currentTime = 0; } catch (_) { /* video chưa nạp metadata */ }
+      jupiter.play().catch(() => { if (id === runId) { resetScene(); start('dio'); } });
+      return;
+    }
+    overlay.classList.remove('jupiter-mode', 'jupiter-audio-only');
+    stopSfx.currentTime = 0; stopSfx.play().catch(() => {});
+    await ready;
+    if (id !== runId) return;                       // đã reset trong lúc chờ
+    dioFrame.dataset.pose = '0'; worldFrame.dataset.pose = '0';
     overlay.classList.remove('active', 'impact', 'world-arrived'); void overlay.offsetWidth;
     overlay.classList.add('active'); overlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('bullsheet-active');
+    slowMelanieForTimeStop();
+    [1, 2, 3, 4, 5, 6, 7, 8].forEach((pose, i) => later(() => { dioFrame.dataset.pose = String(pose); }, T.dioFrame * (i + 1)));
     later(() => {
       overlay.classList.add('world-arrived');
       [1, 2, 3].forEach((pose, i) => later(() => { worldFrame.dataset.pose = String(pose); }, T.worldFrame * (i + 1)));
@@ -120,16 +299,24 @@ function initBullSheet() {
 
   function resetScene() {
     runId++; clearTimers();
-    overlay.classList.remove('active', 'impact', 'world-arrived');
+    overlay.classList.remove('active', 'impact', 'world-arrived', 'jupiter-mode', 'jupiter-audio-only');
     overlay.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('bullsheet-active');
-    dioFrame.classList.remove('holding'); worldFrame.dataset.pose = '0';   // KHÔNG gỡ src
+    document.body.classList.remove('bullsheet-active', 'jupiter-ruined');
+    dioFrame.dataset.pose = '0'; worldFrame.dataset.pose = '0';
     stopSfx.pause(); stopSfx.currentTime = 0;
+    if (jupiter) { jupiter.pause(); jupiterStartedAt = 0; try { jupiter.currentTime = 0; } catch (_) { /* video chưa sẵn sàng */ } }
+    stopFireAudio();
+    stopRuinAnimation();
     if (musicWasPlaying) audio.play().catch(() => {});
     musicWasPlaying = false; running = false;
+    resumeMelanieAfterTimeStop();
   }
 
-  document.addEventListener('click', e => { if (e.target.closest?.('#bullsheet-button')) start(); });
+  document.addEventListener('click', e => {
+    if (!e.target.closest?.('#bullsheet-button')) return;
+    const mode = nextMode; nextMode = mode === 'dio' ? 'jupiter' : 'dio';
+    start(mode);
+  });
   reset.addEventListener('click', resetScene);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('active')) resetScene(); });
 }
@@ -185,9 +372,49 @@ function initMusic() {
     mute.textContent = audio.muted ? '🔇' : '🔊';
   });
 }
+const MELANIE_FRAMES = Array.from({ length: 16 }, (_, i) => `assets/melanie-frames/frame-${String(i).padStart(2, '0')}.png`);
+let melanieFrame = 0, melaniePlaybackTimer = 0, melanieSlowTimer = 0;
+const MELANIE_FRAME_CACHE = MELANIE_FRAMES.map(src => { const image = new Image(); image.src = src; return image; });
+function setMelanieFrame(index) {
+  melanieFrame = (index + MELANIE_FRAMES.length) % MELANIE_FRAMES.length;
+  document.querySelectorAll('.melanie-art').forEach(img => { img.src = MELANIE_FRAMES[melanieFrame]; });
+}
+function clearMelanieTimers() {
+  clearInterval(melaniePlaybackTimer); clearTimeout(melanieSlowTimer);
+  melaniePlaybackTimer = melanieSlowTimer = 0;
+}
+function syncMelanieMotion() {
+  if (document.body.classList.contains('bullsheet-active')) return;
+  clearMelanieTimers();
+  document.body.classList.remove('melanie-frozen');
+  const images = [...document.querySelectorAll('.melanie-art')];
+  const shouldAnimate = !document.body.classList.contains('article-open') && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!shouldAnimate) {
+    images.forEach(img => { img.src = img.dataset.still || 'assets/melanie-hcmut.png'; });
+    return;
+  }
+  setMelanieFrame(0);
+  melaniePlaybackTimer = setInterval(() => setMelanieFrame(melanieFrame + 1), 110);
+}
+function slowMelanieForTimeStop() {
+  clearMelanieTimers();
+  const slowSteps = [120, 200, 330, 520, 800];
+  let step = 0;
+  const advance = () => {
+    if (!document.body.classList.contains('bullsheet-active')) return;
+    if (step >= slowSteps.length) { document.body.classList.add('melanie-frozen'); return; }
+    setMelanieFrame(melanieFrame + 1);
+    melanieSlowTimer = setTimeout(advance, slowSteps[step++]);
+  };
+  melanieSlowTimer = setTimeout(advance, 120);
+}
+function resumeMelanieAfterTimeStop() { syncMelanieMotion(); }
+function initMelanieMotion() {
+  matchMedia('(prefers-reduced-motion: reduce)').addEventListener?.('change', syncMelanieMotion);
+}
 async function load() {
   // Mỗi phần khởi tạo chạy riêng: lỗi ở hiệu ứng/nhạc không được chặn việc tải danh sách bài.
-  for (const init of [initTheme, initMusic, initBullSheet]) {
+  for (const init of [initTheme, initMusic, initMelanieMotion, initBullSheet]) {
     try { init(); } catch (e) { console.error(`[${init.name}]`, e); }
   }
   try { const r = await fetchFresh('writeups/index.json'); if (!r.ok) throw new Error('index'); DB = await r.json(); route(); }
@@ -197,20 +424,18 @@ function route() {
   const [view, arg] = location.hash.replace(/^#\/?/, '').split('/');
   document.body.classList.toggle('article-open', view === 'w');
   document.body.classList.toggle('show-backdrop', view !== 'w');
-  const melanie = document.querySelector('.melanie-art');
-  if (melanie) melanie.src = view === 'w' || matchMedia('(prefers-reduced-motion: reduce)').matches ? melanie.dataset.still : melanie.dataset.animation;
   document.querySelectorAll('nav a[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === (view === 'about' ? 'about' : 'home')));
   window.scrollTo(0, 0); document.title = 'BKISC-Recruitment-CTF 2026 · chlorcale/writeups';
-  if (view === 'w') return renderPost(decodeURIComponent(arg || ''));
-  if (view === 'about') return renderAbout();
-  renderHome();
+  if (view === 'w') { renderPost(decodeURIComponent(arg || '')); syncMelanieMotion(); return; }
+  if (view === 'about') { renderAbout(); syncMelanieMotion(); return; }
+  renderHome(); syncMelanieMotion();
 }
 function categories() { return [...new Set(DB.map(w => w.category))].sort((a,b) => (Object.keys(CATS).indexOf(a) < 0 ? 99 : Object.keys(CATS).indexOf(a)) - (Object.keys(CATS).indexOf(b) < 0 ? 99 : Object.keys(CATS).indexOf(b))); }
 function renderHome() {
   const cats = categories();
   const counts = Object.fromEntries(cats.map(c => [c, DB.filter(w => w.category === c).length]));
   const done = DB.filter(w => w.done).length;
-  app.innerHTML = `<section class="hero"><div class="melanie-corner" aria-hidden="true"><img src="assets/melanie-hcmut.webp" alt=""></div><div class="hero-copy"><p class="event-stamp">BKISC-Recruitment-CTF 2026</p><h1>chlorcale<span>/writeups</span></h1><p class="lede">Blog Page CTF ghi các writeup của NMHP</p></div>
+  app.innerHTML = `<section class="hero"><div class="melanie-corner" aria-hidden="true"><img class="melanie-art" src="assets/melanie-hcmut.png" data-still="assets/melanie-hcmut.png" alt=""></div><div class="hero-copy"><p class="event-stamp">BKISC-Recruitment-CTF 2026</p><h1>chlorcale<span>/writeups</span></h1><p class="lede">Blog Page CTF ghi các writeup của NMHP.</p></div>
     <div class="overview"><div class="distribution" aria-label="Phân bố bài theo mảng">${cats.map(c => `<button class="dist-segment ${state.cat===c?'selected':''}" data-cat="${esc(c)}" style="--cat:${COLORS[c]||COLORS.misc};--share:${counts[c]/DB.length}" title="${esc(catName(c))}: ${counts[c]} bài" aria-label="Lọc ${esc(catName(c))}, ${counts[c]} bài"></button>`).join('')}</div>
     <div class="dist-labels">${cats.map(c => `<button class="dist-label" data-cat="${esc(c)}"><i style="--cat:${COLORS[c]||COLORS.misc}"></i>${esc(catName(c))} <span>${counts[c]}</span></button>`).join('')}</div>
     <p class="stats"><strong>${DB.length}</strong> bài đã giải <span>·</span> <strong>${done}</strong> bài có writeup</p></div></section>
@@ -280,5 +505,5 @@ async function renderPost(slug){
   article.querySelectorAll('.flag-copy').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(b.parentElement.querySelector('code').innerText);b.textContent='Đã chép';setTimeout(()=>b.textContent='Sao chép',1500);}catch(_){b.textContent='Không chép được';setTimeout(()=>b.textContent='Sao chép',1500);}}));
 }
 function postNav(idx){return `<nav class="post-nav" aria-label="Điều hướng bài">${idx>0?`<a href="#/w/${encodeURIComponent(DB[idx-1].slug)}">← ${esc(DB[idx-1].title)}</a>`:'<span></span>'}${idx<DB.length-1?`<a class="next" href="#/w/${encodeURIComponent(DB[idx+1].slug)}">${esc(DB[idx+1].title)} →</a>`:''}</nav>`;}
-function renderAbout(){app.innerHTML='<section class="about"><h1>Giới thiệu</h1><p>Sổ tay writeup CTF của <a href="https://github.com/chlorcale">chlorcale</a>. Mỗi bài lưu lại đề bài, kỹ thuật sử dụng và cách giải theo từng bước.</p></section>';}
+function renderAbout(){app.innerHTML='<section class="about"><h1>Giới thiệu</h1><p>Helo i am <a href="https://github.com/chlorcale">chlorcale</a> :3</p></section>';}
 addEventListener('hashchange',route);load();
