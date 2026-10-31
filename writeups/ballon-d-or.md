@@ -43,8 +43,8 @@ Mở binary trong IDA, chờ auto-analysis hoàn tất, chọn hàm `main` trong
 
 Luồng khai thác được xác nhận bằng log remote là **menu `2` → gửi note → menu `3`**. Menu `4` là một nhánh riêng, không phải bước cần thiết của payload này.
 
-<!-- TODO-IMAGE: 01-main-menu-ida.png — ảnh IDA decompile main(), thể hiện switch menu 1–5 -->
-![IDA - main và các lựa chọn menu](../assets/writeups/ballon-dor/01-main-menu-ida.png)
+
+![IDA - main và các lựa chọn menu](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/ballon/01-main-menu-ida.png?raw=true)
 
 ### Bước 2. Tìm lỗi trong `write_ballot_note()`
 
@@ -107,8 +107,8 @@ và được chấp nhận. Nhưng hàm đọc vẫn nhận độ dài 256 byte.
 
 Đây là lỗi **integer truncation trong bước kiểm tra độ dài**, dẫn đến **out-of-bounds write** khi hàm đọc sử dụng độ dài gốc.
 
-<!-- TODO-IMAGE: 02-write-ballot-note.png — ảnh pseudocode write_ballot_note(), làm rõ cast unsigned __int8 và read_exact((char *)ballot, length) -->
-![IDA - hàm write_ballot_note](../assets/writeups/ballon-dor/02-write-ballot-note.png)
+
+![IDA - hàm write_ballot_note](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/ballon/02-write-ballot-note.png?raw=true)
 
 ### Bước 3. Đọc điều kiện trong `submit_ballot()`
 
@@ -151,8 +151,8 @@ Giá trị thập phân `3405707982` tương ứng với hằng số hexadecimal
 
 Như vậy, payload cần ghi hai giá trị này vào đúng vị trí của hai trường trong cấu trúc `Ballot`.
 
-<!-- TODO-IMAGE: 03-submit-ballot.png — ảnh pseudocode submit_ballot(), thể hiện hai điều kiện nominee_id và approval_code -->
-![IDA - hàm submit_ballot](../assets/writeups/ballon-dor/03-submit-ballot.png)
+
+![IDA - hàm submit_ballot](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/ballon/03-submit-ballot.png?raw=true)
 
 ### Bước 4. Xác định offset và xây dựng payload
 
@@ -273,8 +273,8 @@ Menu `4` gọi `vuln()` rồi quay lại menu. Trong khi đó, exploit thực t�
 
 Vì vậy, chuỗi `BKISC{we_all_know_the_GOAT_is_Messi}` trong `vuln()` là một flag tĩnh/flag mồi trong binary local. Không nên nhầm nó với flag thực tế lấy được từ `flag.txt` trên remote.
 
-<!-- TODO-IMAGE: 04-vuln-decoy.png — ảnh pseudocode vuln() có chuỗi BKISC{we_all_know_the_GOAT_is_Messi} -->
-![IDA - hàm vuln và flag tĩnh](../assets/writeups/ballon-dor/04-vuln-decoy.png)
+
+![IDA - hàm vuln và flag tĩnh](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/ballon/04-vuln-decoy.png?raw=true)
 
 ### Bước 8. Vì sao xuất hiện prompt `$` và vai trò của `io.interactive()`
 

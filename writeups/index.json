@@ -35,9 +35,14 @@
     "slug": "darling",
     "title": "Darling",
     "category": "pwn",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "out-of-bounds-write",
+      "got-overwrite",
+      "ret2plt",
+      "integer-index-arithmetic"
+    ],
+    "summary": "Khai thác chỉ số mảng không được kiểm tra để ghi đè free@GOT bằng system@PLT, khiến free(name) trở thành system(\"/bin/sh\")."
   },
   {
     "slug": "hide-n-seek",
@@ -51,9 +56,16 @@
     "slug": "backup",
     "title": "Backup",
     "category": "forensics",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "oci-image-layer-extraction",
+      "docker-layer-forensics",
+      "sqlite-database-analysis",
+      "audit-log-analysis",
+      "aes-256-cbc",
+      "pkcs7-unpadding"
+    ],
+    "summary": "Trích các layer của OCI image để lấy lại bootstrap.json chứa khoá AES và docservice-seed.tar, đối chiếu audit log với SQLite để xác định document 184 rồi giải mã AES-256-CBC."
   },
   {
     "slug": "ballon-d-or",
@@ -63,11 +75,12 @@
     "techniques": [
       "reverse-engineering",
       "ida-decompiler",
+      "integer-truncation",
       "out-of-bounds-write",
       "structure-field-overwrite",
       "pwntools-interactive"
     ],
-    "summary": "Phân tích luồng menu bằng IDA, theo dõi dữ liệu của ballot và xây dựng payload 256 byte để ghi đè các trường kiểm tra trước khi submit."
+    "summary": "Khai thác lỗi ép length về uint8_t khi kiểm tra giới hạn note, từ đó ghi 256 byte vào cấu trúc Ballot để sửa nominee_id và approval_code, vượt qua submit_ballot và lấy shell trên remote."
   },
   {
     "slug": "digital-systems",

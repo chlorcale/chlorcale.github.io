@@ -533,9 +533,7 @@ Exploit đọc `B` và `attempts` từ banner, áp dụng bộ lọc ngân sách
 
 ## Flag
 
-```text
-BKISC{H0w_m4ny_t1m35_h4v3_y0u_tr13d?_b00122f50b2c}
-```
+`BKISC{H0w_m4ny_t1m35_h4v3_y0u_tr13d?_b00122f50b2c}`
 
 ## Tài liệu tham khảo
 
