@@ -68,9 +68,16 @@
     "slug": "exam-leaked",
     "title": "Exam Leaked",
     "category": "forensics",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "vba-macro-analysis",
+      "olevba",
+      "base64-decoding",
+      "single-byte-xor",
+      "known-plaintext-key-recovery",
+      "ioc-extraction"
+    ],
+    "summary": "Trích macro VBA tự chạy từ file Word bằng olevba, thấy flag bị giấu bằng Base64 rồi XOR với 55 và bị xoá khỏi đĩa ngay khi macro chạy, nên giải mã tĩnh chuỗi trong mã nguồn."
   },
   {
     "slug": "a-veil-of-mist",
