@@ -48,9 +48,18 @@
     "slug": "hide-n-seek",
     "title": "Hide n Seek",
     "category": "forensics",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "disk-forensics",
+      "linux-artifact-analysis",
+      "nginx-log-analysis",
+      "systemd-persistence",
+      "elf-reversing",
+      "dynamic-library-analysis",
+      "network-forensics",
+      "xor-decryption"
+    ],
+    "summary": "Điều tra image Linux .dd từ dấu vết Nginx, systemd drop-in và ELF được nạp động; lần theo kết nối TCP lặp tới cổng 4444 và giải mã dữ liệu ẩn trong thư viện."
   },
   {
     "slug": "backup",
