@@ -83,9 +83,16 @@
     "slug": "a-veil-of-mist",
     "title": "a Veil of Mist",
     "category": "reverse",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "custom-vm-reversing",
+      "bytecode-disassembly",
+      "stack-machine-lifo",
+      "inverse-arithmetic",
+      "per-byte-bruteforce",
+      "byte-register-emulation"
+    ],
+    "summary": "Binary chal là trình thông dịch của VM tự chế, còn code là bytecode. Từ bảng opcode, viết parser/disassembler và solver thử 256 giá trị cho mỗi nhóm kiểm tra độc lập; đảo thứ tự các byte tìm được do stack LIFO để khôi phục flag."
   },
   {
     "slug": "take-me-to-church",

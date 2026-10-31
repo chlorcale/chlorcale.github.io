@@ -41,8 +41,8 @@ Kết quả cần chú ý:
 
 Kết luận sơ bộ: `chal` đọc `code` rồi thực thi từng lệnh trong file đó.
 
-<!-- TODO-IMAGE: 04-code-hexdump.png — terminal chạy xxd -g1 -c16 code | head, thấy các byte đầu 3e 46 3e 6c ... -->
-![Terminal - hexdump file code](../assets/writeups/a-veil-of-mist/04-code-hexdump.png)
+
+![Terminal - hexdump file code](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/mist/04-code-hexdump.png?raw=true)
 
 ### Bước 2. Mở `chal` và chọn Language trong Ghidra
 
@@ -52,7 +52,7 @@ Không import `code` như một chương trình x86-64. Đây là bytecode cho V
 
 Ảnh dưới là `chal` mở trong IDA. Hàm `start` có dòng `lea rdi, main` ngay trước `call __libc_start_main`. Bấm đôi vào `main`, sau đó nhấn `F5` để xem pseudocode. Các cảnh báo `positive sp value has been found` xuất hiện tại đoạn `start` trong cửa sổ Output; chúng không làm thay đổi luồng phân tích `main` trong trường hợp này.
 
-![IDA - hàm start trỏ tới main](../assets/writeups/a-veil-of-mist/01-ida-start.png)
+![IDA - hàm start trỏ tới main](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/mist/01-ida-start.png?raw=true)
 
 Địa chỉ trong Ghidra thường có tiền tố `0x001...` (ví dụ `FUN_001013dc`), còn IDA có thể hiển thị địa chỉ rút gọn như `sub_13DC`. Các tên hàm trong writeup này dùng theo Ghidra.
 
@@ -79,8 +79,8 @@ if (argc == 2) {
 
 Hai hàm cần phân tích tiếp theo thứ tự là hàm nạp file `FUN_00101289()` và hàm thông dịch `FUN_001013dc()`. Hàm thông dịch trả về `0` thì chương trình in `Correct!!!`.
 
-<!-- TODO-IMAGE: 02-main-and-loader.png — pseudocode main() và FUN_00101289 (fopen, fseek/ftell, fread vào DAT_00104040) -->
-![Ghidra - main() và hàm nạp file](../assets/writeups/a-veil-of-mist/02-main-and-loader.png)
+
+![Ghidra - main() và hàm nạp file](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/mist/02-main-and-loader.png?raw=true)
 
 ### Bước 4. Đọc hàm nạp file: xác định dữ liệu khởi tạo của VM
 
@@ -150,8 +150,8 @@ Hai hàm phụ trong binary:
 
 Trong mô hình solver bên dưới, các phép toán được thử với thanh ghi 8-bit, tức cộng/trừ theo modulo 256. Cần đối chiếu kích thước thanh ghi với pseudocode/assembly của binary; nếu giả định 8-bit không khớp, thử mô hình 32-bit như tùy chọn của script.
 
-<!-- TODO-IMAGE: 03-interpreter-switch.png — hàm FUN_001013dc với các case opcode (>, ?, $, ',', !, |, @, =) và nhánh 0x0d -->
-![Ghidra - vòng lặp thông dịch và các opcode](../assets/writeups/a-veil-of-mist/03-interpreter-switch.png)
+
+![Ghidra - vòng lặp thông dịch và các opcode](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/mist/03-interpreter-switch.png?raw=true)
 
 ### Bước 6. Dùng kích thước file để kiểm tra độ dài instruction
 
@@ -461,8 +461,8 @@ Kết quả mong đợi là `Correct!!!`. Transcript được cung cấp ở đ�
 
 > **Vì sao không brute force cả chuỗi?** Với 30 byte, brute force toàn bộ có `256^30` khả năng. Solver chỉ thử 256 giá trị cho mỗi nhóm kiểm tra độc lập, tổng cộng `30 × 256 = 7680` lượt thử tối đa.
 
-<!-- TODO-IMAGE: 05-solver-output.png — terminal chạy python3 solve.py, hiển thị 30 input bytes, 30 check groups và flag ASCII được khôi phục; có thể ghép thêm terminal chạy ./chal code nếu đã chụp ảnh kiểm chứng -->
-![Terminal - kết quả solver](../assets/writeups/a-veil-of-mist/05-solver-output.png)
+
+![Terminal - kết quả solver](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/mist/05-solver-output.png?raw=true)
 
 ## Flag
 
