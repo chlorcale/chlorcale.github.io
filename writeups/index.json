@@ -20,9 +20,16 @@
     "slug": "nta-1-intro-to-network-traffic-analysis",
     "title": "NTA 1 - Intro to Network Traffic Analysis",
     "category": "forensics",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "powershell-deobfuscation",
+      "c2-traffic-analysis",
+      "pcap-analysis",
+      "aes-256-cbc",
+      "hmac-sha256",
+      "dns-exfiltration"
+    ],
+    "summary": "Giải tĩnh loader PowerShell để lấy master key, giải mã HTTP C2, sau đó ghép và giải mã các DNS query dùng để exfiltrate flag.txt."
   },
   {
     "slug": "darling",

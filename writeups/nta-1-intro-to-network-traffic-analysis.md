@@ -45,7 +45,7 @@ Các endpoint đáng chú ý:
 Đây là mô hình C2 polling: agent chủ động hỏi máy chủ để nhận task, thực hiện task rồi gửi kết quả trở lại. Nội dung HTTP chưa đọc được trực tiếp vì body được đóng gói và mã hóa.
 
 
-![Wireshark - tổng quan traffic HTTP](../assets/writeups/nta/01-wireshark-overview.png)
+![Wireshark - tổng quan traffic HTTP](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/nta/01-wireshark-overview.png?raw=true)
 
 ### Bước 2. Giải lớp loader của agent.ps1
 
