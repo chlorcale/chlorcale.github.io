@@ -59,15 +59,21 @@
     "slug": "ballon-d-or",
     "title": "Ballon d'Or",
     "category": "pwn",
-    "done": false,
-    "techniques": [],
-    "summary": ""
+    "done": true,
+    "techniques": [
+      "reverse-engineering",
+      "ida-decompiler",
+      "out-of-bounds-write",
+      "structure-field-overwrite",
+      "pwntools-interactive"
+    ],
+    "summary": "Phân tích luồng menu bằng IDA, theo dõi dữ liệu của ballot và xây dựng payload 256 byte để ghi đè các trường kiểm tra trước khi submit."
   },
   {
     "slug": "digital-systems",
     "title": "Digital Systems",
     "category": "pwn",
-    "done": false,
+    "done": true,
     "techniques": [],
     "summary": ""
   },
