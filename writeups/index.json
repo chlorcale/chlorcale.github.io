@@ -202,7 +202,7 @@
     "slug": "admin-portal",
     "title": "Admin Portal",
     "category": "web",
-    "done": false,
+    "done": true,
     "techniques": [],
     "summary": ""
   },
@@ -224,7 +224,7 @@
     "slug": "netcat-101",
     "title": "Netcat 101",
     "category": "misc",
-    "done": false,
+    "done": true,
     "techniques": [],
     "summary": ""
   },

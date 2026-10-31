@@ -46,7 +46,7 @@ Trong FTK Imager:
 
 Giữ nguyên file image gốc. Khi cần phân tích bằng công cụ dòng lệnh, export bản sao của file ra thư mục làm việc.
 
-![FTK Imager - Evidence Tree](../assets/writeups/hide_and_seek/01-ftk-evidence-tree.png)
+![FTK Imager - Evidence Tree](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/hide_n_seek/01-ftk-evidence-tree.png?raw=true)
 
 Cấu trúc ban đầu cho thấy các nhánh `/home/ops`, `/usr/lib`, `/var/log` và `/var/www/intranet/releases`. Hai thư mục release `20261012-0830` và `20261017-1745` là các bản triển khai website cần đối chiếu.
 
@@ -184,7 +184,7 @@ Hai chỉ thị quan trọng:
 
 Điều này tạo được mối liên hệ cần kiểm tra giữa việc Nginx khởi động và chương trình `cache-maint`.
 
-![FTK Imager - nginx.service.d](../assets/writeups/hide_and_seek/02-nginx-systemd-dropin.png)
+![FTK Imager - nginx.service.d](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/hide_n_seek/02-nginx-systemd-dropin.png?raw=true)
 
 File `/etc/default/nginx-cache` được trích xuất có nội dung:
 
@@ -267,7 +267,7 @@ call connect@plt
 
 Trong đoạn đã cung cấp, địa chỉ IPv4 được tham chiếu từ vùng dữ liệu tại VA `0x207e`. Điều này phù hợp với đích `192.168.137.137` xuất hiện trong `kern.log`; cần đối chiếu chuỗi tại địa chỉ này trong file ELF để xác nhận trực tiếp.
 
-![Disassembly cache_sync](../assets/writeups/hide_and_seek/03-cache-sync-disassembly.png)
+![Disassembly cache_sync](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/hide_n_seek/03-cache-sync-disassembly.png?raw=true)
 
 ### Bước 8. Khôi phục dữ liệu XOR trong vùng dữ liệu của ELF
 
@@ -401,14 +401,3 @@ Lưu ý về mức độ xác minh: các dòng SYN chứng minh có nỗ lực k
 ## Flag
 
 `BKISC{wo4h_u_kn0w_h0w_t0_f1nd_m3}`
-
-## Ảnh cần bổ sung
-
-Đặt ảnh vào `assets/writeups/hide_and_seek/` theo các tên được tham chiếu trong bài:
-
-```text
-assets/writeups/hide_and_seek/
-├── 01-ftk-evidence-tree.png
-├── 02-nginx-systemd-dropin.png
-└── 03-cache-sync-disassembly.png
-```
