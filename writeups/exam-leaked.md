@@ -5,7 +5,7 @@ summary: Trích macro VBA tự chạy từ file Word bằng olevba, thấy flag 
 
 ## Đề bài
 
-TODO: dán nguyên văn đề bài. Theo nội dung macro, đề là một tài liệu Word `.doc` chứa macro VBA tự chạy khi mở file. Macro tạo `flag.txt` trong thư mục `%TEMP%` rồi xoá ngay, nên không có file nào để lấy. Flag nằm ngay trong mã macro.
+![Macro VBA tự chạy khi mở file](https://github.com/chlorcale/chlorcale.github.io/blob/main/writeups/images/exam-leaked.png?raw=true)
 
 ## Kỹ thuật sử dụng
 
@@ -39,7 +39,7 @@ Không cần hiểu từng dòng. Đọc theo bốn câu hỏi:
 | Flag đi đâu? | `Open ... For Output`, `Print #1`, `Kill` | ghi ra `%TEMP%\flag.txt` rồi `Kill` (xoá) ngay |
 | Dữ liệu nào gửi ra ngoài? | `ServerXMLHTTP`, `.Send` | chỉ dữ liệu Wi-Fi gửi đi, không phải flag |
 
-Điểm đáng chú ý nhất là dòng thứ ba. Macro tạo flag trên đĩa rồi xoá, nên phân tích động (chạy macro rồi tìm file) sẽ không thấy gì. Muốn lấy flag phải đọc cách nó được tạo ra và tự làm lại bằng tay.
+Điểm đáng chú ý nhất là dòng thứ ba. Macro tạo flag trên đĩa rồi xoá, nên phân tích động (chạy macro rồi tìm file) sẽ không thấy gì. Muốn lấy flag phải đọc cách nó được tạo ra và tự làm lại.
 
 ### Bước 3. Xác định hai lớp mã hoá của biến `flag`
 
